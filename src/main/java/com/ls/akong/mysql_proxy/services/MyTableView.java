@@ -2,11 +2,8 @@ package com.ls.akong.mysql_proxy.services;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.components.Service;
-import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.table.JBTable;
-import com.intellij.util.Icons;
 import com.ls.akong.mysql_proxy.entity.SqlLog;
 import com.ls.akong.mysql_proxy.model.SqlLogFilterModel;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
@@ -28,12 +25,9 @@ import java.util.TimerTask;
 
 @Service(Service.Level.PROJECT)
 public final class MyTableView extends JPanel {
-    private static final Logger logger = Logger.getInstance(MyTableView.class);
     private final MyTableModel tableModel;
 
     private final JBTable table;
-
-    private JScrollPane scrollPane;
 
     private Timer debounceTimer = new Timer();
 
@@ -70,7 +64,7 @@ public final class MyTableView extends JPanel {
             }
         });
         // 添加到过滤
-        JMenuItem ignoreSqlLogItem = new JMenuItem("Add to Filtered SQL Log", Icons.ADD_ICON);
+        JMenuItem ignoreSqlLogItem = new JMenuItem("Add to Filtered SQL Log", AllIcons.General.Add);    // Icons.ADD_ICON
         ignoreSqlLogItem.addActionListener(e -> {
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
@@ -114,7 +108,7 @@ public final class MyTableView extends JPanel {
         });
 
         // 将表格放置在 JScrollPane 中
-        scrollPane = new JScrollPane(table);
+        JScrollPane scrollPane = new JScrollPane(table);
 
         // 设置布局
         setLayout(new BorderLayout());
@@ -132,7 +126,7 @@ public final class MyTableView extends JPanel {
     }
 
     public static MyTableView getInstance(Project project) {
-        return ServiceManager.getService(project, MyTableView.class);
+        return project.getService(MyTableView.class);
     }
 
     // 展示后回调
@@ -222,7 +216,7 @@ public final class MyTableView extends JPanel {
         /**
          * 获取最后一页的 id
          *
-         * @return
+         * @return integer
          */
         private int getLastItemId() {
             try {
@@ -268,16 +262,12 @@ public final class MyTableView extends JPanel {
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
             SqlLog item = data.get(rowIndex);
-            switch (columnIndex) {
-                case 0:
-                    return item.getId();
-                case 1:
-                    return item.getSql();
-                case 2:
-                    return item.getCreatedAt();
-                default:
-                    return null;
-            }
+            return switch (columnIndex) {
+                case 0 -> item.getId();
+                case 1 -> item.getSql();
+                case 2 -> item.getCreatedAt();
+                default -> null;
+            };
         }
 
         @Override

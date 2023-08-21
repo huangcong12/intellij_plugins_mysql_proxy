@@ -1,5 +1,6 @@
 package com.ls.akong.mysql_proxy.model;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.ls.akong.mysql_proxy.entity.SqlLog;
 import com.ls.akong.mysql_proxy.services.DatabaseManagerService;
@@ -11,9 +12,10 @@ import java.sql.Statement;
 import java.util.*;
 
 public class SqlLogModel {
+    private static final Logger logger = Logger.getInstance(SqlLogModel.class);
     private static Timer debounceTimer = new Timer();
 
-    private static List<String> newLog = new ArrayList<>();
+    private static final List<String> newLog = new ArrayList<>();
 
     public static void insertLog(Project project, String sql) {
         newLog.add(sql);
@@ -110,9 +112,7 @@ public class SqlLogModel {
         if (maxLimitId > 0 || selectedTimeRange.equals("No Limit")) {
             querySQL += " LIMIT 0," + pageSize;
         }
-
-
-        System.out.println("sql: " + querySQL);
+        logger.info("sql: " + querySQL);
 
         DatabaseManagerService databaseManger = project.getService(DatabaseManagerService.class);
         try (Statement statement = databaseManger.getConnection().createStatement(); ResultSet resultSet = statement.executeQuery(querySQL)) {
@@ -135,7 +135,7 @@ public class SqlLogModel {
             insertSQL += " AND sql LIKE '%" + searchText + "%'";
         }
         insertSQL += "AND sql NOT IN (SELECT sql FROM sql_log_filter)";
-        System.out.println("getById sql: " + insertSQL);
+        logger.info("getById sql: " + insertSQL);
 
         DatabaseManagerService databaseManger = project.getService(DatabaseManagerService.class);
         try (PreparedStatement preparedStatement = databaseManger.getConnection().prepareStatement(insertSQL)) {

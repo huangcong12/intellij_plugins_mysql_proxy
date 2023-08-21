@@ -24,14 +24,11 @@ public final class MySQLProxyServerService implements Disposable {
 
     private static final Logger logger = Logger.getInstance(MySQLProxyServerService.class);
 
-    private Project project;
-
+    private final Project project;
+    private final List<Socket> clientSockets;
+    private final List<MysqlProxyServiceStateListener> listeners = new ArrayList<>();
     private boolean isServiceRunning = false;
     private ServerSocket serverSocket;
-
-    private List<Socket> clientSockets;
-
-    private List<MysqlProxyServiceStateListener> listeners = new ArrayList<>();
 
 
     public MySQLProxyServerService(Project project) {
@@ -40,61 +37,8 @@ public final class MySQLProxyServerService implements Disposable {
         clientSockets = new ArrayList<>();
     }
 
-    // 根据命令字节获取命令名称
-    private static String getCommandName(int commandByte) {
-        switch (commandByte) {
-            case 0x00:
-                return "Sleep"; // 该命令没有特定的用途，并且不应由客户端发送
-            case 0x01:
-                return "Quit";  // 客户端用此命令告知服务器该客户端将断开连接
-            case 0x02:
-                return "Init Db";   // 客户端使用此命令告知服务器它想要更改默认操作的数据库
-            case 0x03:
-                return "Query";     // 这可能是最常用的命令，客户端用它来向服务器发送SQL语句
-            case 0x04:
-                return "Field List";    // 此命令用于获取数据表的字段信息
-            case 0x05:
-                return "Create Db";    // 用于创建数据库，此命令已经不再使用
-            case 0x06:
-                return "Drop Db";    // 用于删除数据库，此命令已经不再使用
-            case 0x07:
-                return "Refresh";    // 用于清空缓存，重读my.cnf文件等操作
-            case 0x08:
-                return "Shutdown";    // 关闭MySQL服务器
-            case 0x09:
-                return "Statistic";    // 用于获取服务器统计信息
-            case 0x10:
-                return "Prepare Statement";
-            case 0x11:
-                return "Execute Statement";
-            case 0x12:
-                return "Prepared Execute";
-            case 0x16:
-                return "Stmt Prepare";      // Prepare一个SQL语句并返回给客户端，预处理的SQL语句带有占位符
-            case 0x17:
-                return "Stmt Execute";      // 执行已经Prepare的SQL语句
-            case 0x18:
-                return "Stmt Send Long Data";      // 发送BLOB类型的数据
-            case 0x19:
-                return "Stmt Close";      // 关闭已经Prepare的SQL语句
-            case 0x1a:
-                return "Stmt Reset";      // 重置已经Prepare的SQL语句，使其可以再被执行
-            case 0x1b:
-                return "Set Option";      // 设置或重置客户端的语句执行选项
-            case 0x2D:
-                return "Transaction Begin";
-            case 0x2E:
-                return "Transaction Commit";
-            // 添加更多命令类型和名称映射
-            default:
-                return "Unknown" + commandByte;
-        }
-    }
-
     /**
      * 服务器是否运行中
-     *
-     * @return
      */
     public boolean isServiceRunning() {
         return isServiceRunning;
@@ -210,14 +154,13 @@ public final class MySQLProxyServerService implements Disposable {
         }
     }
 
+    /**
+     * 监听代理服务的状态
+     */
     public void addListener(MysqlProxyServiceStateListener listener) {
         if (!listeners.contains(listener)) {
             listeners.add(listener);
         }
-    }
-
-    public void removeListener(MysqlProxyServiceStateListener listener) {
-        listeners.remove(listener);
     }
 
     private void notifyListeners() {
@@ -261,8 +204,6 @@ public final class MySQLProxyServerService implements Disposable {
 
                 // 转发客户端请求给 MySQL 服务器
                 InputStream clientIn = clientSocket.getInputStream();
-                OutputStream clientOut = clientSocket.getOutputStream();
-                InputStream mysqlIn = mysqlSocket.getInputStream();
                 OutputStream mysqlOut = mysqlSocket.getOutputStream();
 
                 byte[] buffer = new byte[4096];

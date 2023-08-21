@@ -19,11 +19,9 @@ import java.sql.Statement;
 public final class DatabaseManagerService implements Disposable {
     private static final Logger logger = Logger.getInstance(DatabaseManagerService.class);
 
-    private Project project;
     private Connection connection;
 
     public DatabaseManagerService(@NotNull Project project) {
-        this.project = project;
 
         try {
             // TODO 开发过程中，换成非插件的目录

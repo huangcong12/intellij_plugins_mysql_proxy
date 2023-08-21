@@ -22,7 +22,4 @@ public class SqlLogFilter {
         return sql;
     }
 
-    public Long getCreatedAt() {
-        return createdAt;
-    }
 }
