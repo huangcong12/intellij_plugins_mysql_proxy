@@ -127,7 +127,7 @@
                 </constraints>
                 <properties>
                   <enabled value="true"/>
-                  <icon value="general/add.png"/>
+                  <icon value="icons/add.png"/>
                   <text value=""/>
                 </properties>
               </component>
@@ -136,7 +136,7 @@
                   <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <icon value="general/remove.png"/>
+                  <icon value="icons/remove.png"/>
                   <text value=""/>
                 </properties>
               </component>
@@ -145,7 +145,7 @@
                   <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <icon value="actions/edit.png"/>
+                  <icon value="icons/edit.png"/>
                   <text value=""/>
                 </properties>
               </component>
