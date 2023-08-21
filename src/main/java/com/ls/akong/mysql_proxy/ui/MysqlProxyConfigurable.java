@@ -15,7 +15,7 @@ public class MysqlProxyConfigurable implements Configurable {
 
     private ConfigurableForm configurableForm;
 
-    private Project project;  // Project object to store the passed project
+    private final Project project;  // Project object to store the passed project
 
     // Constructor to receive the Project object
     public MysqlProxyConfigurable(Project project) {

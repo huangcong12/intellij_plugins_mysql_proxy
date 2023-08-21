@@ -36,9 +36,6 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
 
     /**
      * 启动一个新 tool windows，编辑器启动完成后，自动调用。只运行一遍，ToolWindowFactory 规定必须要实现
-     *
-     * @param project
-     * @param toolWindow
      */
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
@@ -59,7 +56,7 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
         SearchTextField searchField = new SearchTextField();
         // 创建一个 JComboBox 包含时间段选项
         String[] timeRanges = {"No Limit", "Within 10s", "Within 1m", "Within 5m", "Within 10m"};
-        JComboBox<String> timeRangeComboBox = new JComboBox<>(timeRanges);
+        JComboBox<String> timeRangeComboBox = new com.intellij.openapi.ui.ComboBox<>(timeRanges);
 
         // 输入框监听
         searchField.addDocumentListener(new DocumentListener() {
@@ -143,8 +140,6 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
 
     /**
      * mysql proxy server 状态变化订阅。修改 toolwindow 的图标
-     *
-     * @param isRunning
      */
     @Override
     public void onServiceStateChanged(boolean isRunning) {

@@ -19,9 +19,6 @@ public class RunOrStopServerAction extends AnAction {
 
     private Project project;
 
-    /**
-     * @param e
-     */
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         project = e.getProject();
@@ -38,9 +35,6 @@ public class RunOrStopServerAction extends AnAction {
         }
     }
 
-    /**
-     * @param e
-     */
     @Override
     public void update(@NotNull AnActionEvent e) {
         project = e.getProject();
@@ -62,8 +56,6 @@ public class RunOrStopServerAction extends AnAction {
      * 方法在哪个线程中运行。你可以选择在后台线程（BGT）或事件分发线程（EDT）中运行 update() 方法。如果你选择在后台线程运行 update()
      * 方法，那么你可以保证在执行 update() 方法时可以读取 PSI、虚拟文件系统（VFS）或项目模型。但是，你不能直接访问 Swing 组件。
      * 如果你选择在事件分发线程运行 update() 方法，那么你不能访问 PSI、VFS 或项目数据，但是可以访问 Swing 组件和其他 UI 模型 plugins.jetbrains.com。
-     *
-     * @return
      */
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {

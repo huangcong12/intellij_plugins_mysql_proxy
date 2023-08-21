@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Vector;
 
 public class ConfigurableForm {
+    private final DefaultTableModel tableModel;
     private JPanel panel;
     private JTextField targetMysqlIpTextField;
     private JTextField targetMysqlPortTextField;
@@ -30,12 +31,7 @@ public class ConfigurableForm {
     private JButton removeButton;
     private JButton editButton;
 
-    private Project project;
-
-    private DefaultTableModel tableModel;
-
     public ConfigurableForm(Project project) {
-        this.project = project;
 
         // 创建表格模型
         tableModel = new DefaultTableModel();
@@ -100,10 +96,6 @@ public class ConfigurableForm {
 
     /**
      * Helper method to set column width
-     *
-     * @param table
-     * @param columnIndex
-     * @param width
      */
     private static void setColumnWidth(JTable table, int columnIndex, int width) {
         TableColumn column = table.getColumnModel().getColumn(columnIndex);
@@ -114,8 +106,6 @@ public class ConfigurableForm {
 
     /**
      * 填充数据
-     *
-     * @param project
      */
     private void populateTableData(Project project) {
         // 清空数据
@@ -129,10 +119,10 @@ public class ConfigurableForm {
         // 添加表格数据
         List<SqlLogFilter> sqlLogFilterList = SqlLogFilterModel.querySqlLogFilter(project);
 
-        for (int i = 0; i < sqlLogFilterList.size(); i++) {
+        for (SqlLogFilter sqlLogFilter : sqlLogFilterList) {
             Vector<Object> rowData = new Vector<>();
-            rowData.add(sqlLogFilterList.get(i).getId());
-            rowData.add(sqlLogFilterList.get(i).getSql());
+            rowData.add(sqlLogFilter.getId());
+            rowData.add(sqlLogFilter.getSql());
 
             tableModel.addRow(rowData);
         }
@@ -192,32 +182,12 @@ public class ConfigurableForm {
         this.targetMysqlPortTextField.setText(targetMysqlPort);
     }
 
-    public JButton getTestConnectionButton() {
-        return testConnectionButton;
-    }
-
-    public void setTestConnectionButton(JButton testConnectionButton) {
-        this.testConnectionButton = testConnectionButton;
-    }
-
-    public JPanel getMysqlPanel() {
-        return mysqlPanel;
-    }
-
-    public void setMysqlPanel(JPanel mysqlPanel) {
-        this.mysqlPanel = mysqlPanel;
-    }
-
     public String getListeningPortTextField() {
         return ListeningPortTextField.getText();
     }
 
     public void setListeningPortTextField(String listeningPort) {
         ListeningPortTextField.setText(listeningPort);
-    }
-
-    public JPanel getFieldSqlPanel() {
-        return FieldSqlPanel;
     }
 
     public void setFieldSqlPanel(JPanel fieldSqlPanel) {

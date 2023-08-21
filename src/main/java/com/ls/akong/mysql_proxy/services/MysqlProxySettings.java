@@ -5,6 +5,7 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -27,22 +28,17 @@ public final class MysqlProxySettings implements PersistentStateComponent<MysqlP
     }
 
     @Override
-    public void loadState(State state) {
+    public void loadState(@NotNull State state) {
         myState = state;
     }
 
     /**
      * 是否开启监听 sql 日志
-     *
-     * @return
      */
     public boolean isMonitorEnabled() {
         return myState.isMonitorEnabled;
     }
 
-    public void setMonitorEnabled(boolean enabled) {
-        myState.isMonitorEnabled = enabled;
-    }
 
     /**
      * 切换是否监听 sql 日志
@@ -53,8 +49,6 @@ public final class MysqlProxySettings implements PersistentStateComponent<MysqlP
 
     /**
      * 是否跟随编辑器启动
-     *
-     * @return
      */
     public boolean isStartWithEditor() {
         return myState.startWithEditor;

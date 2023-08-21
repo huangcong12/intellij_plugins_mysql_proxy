@@ -7,9 +7,7 @@ import com.ls.akong.mysql_proxy.ui.MysqlProxyConfigurable;
 import org.jetbrains.annotations.NotNull;
 
 public class SettingServerAction extends AnAction {
-    /**
-     * @param e
-     */
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         ShowSettingsUtil.getInstance().showSettingsDialog(e.getProject(), MysqlProxyConfigurable.class);

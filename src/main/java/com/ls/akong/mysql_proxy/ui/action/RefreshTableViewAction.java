@@ -10,9 +10,7 @@ import org.jetbrains.annotations.NotNull;
  * 点击 “RefreshTable” 按钮后调用
  */
 public class RefreshTableViewAction extends AnAction {
-    /**
-     * @param e
-     */
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         Project project = e.getProject();

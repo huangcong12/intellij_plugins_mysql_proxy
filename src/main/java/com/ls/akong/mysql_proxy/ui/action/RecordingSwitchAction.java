@@ -9,6 +9,7 @@ import com.ls.akong.mysql_proxy.services.MysqlProxySettings;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.util.Objects;
 
 /**
  * 监听、关闭监听 sql log 按钮点击调用
@@ -18,20 +19,15 @@ public class RecordingSwitchAction extends AnAction {
 
     /**
      * 按钮点击调用
-     *
-     * @param e
      */
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(e.getProject());
+        MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(Objects.requireNonNull(e.getProject()));
         logger.info("目前：" + recordingSwitch.isMonitorEnabled());
         recordingSwitch.toggleMonitorEnabled();
         logger.info("点击后变成：" + recordingSwitch.isMonitorEnabled());
     }
 
-    /**
-     * @param e
-     */
     @Override
     public void update(@NotNull AnActionEvent e) {
         super.update(e);
@@ -48,7 +44,7 @@ public class RecordingSwitchAction extends AnAction {
         // 使用 SwingUtilities.invokeLater() 方法
         SwingUtilities.invokeLater(() -> {
             // 在此处执行与界面相关的操作
-            MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(e.getProject());
+            MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(Objects.requireNonNull(e.getProject()));
             if (recordingSwitch.isMonitorEnabled()) {
                 Icon listeningIcon = IconLoader.getIcon("/icons/listening.svg", RecordingSwitchAction.class);
                 e.getPresentation().setIcon(listeningIcon); // 监听中，展示停止图标

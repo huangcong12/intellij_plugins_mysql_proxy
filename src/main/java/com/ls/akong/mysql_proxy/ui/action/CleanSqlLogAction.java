@@ -11,9 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * 点击 “CleanSqlLog” 按钮后调用
  */
 public class CleanSqlLogAction extends AnAction {
-    /**
-     * @param e
-     */
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         Project project = e.getProject();

@@ -3,6 +3,7 @@ package com.ls.akong.mysql_proxy.services;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.ls.akong.mysql_proxy.entity.SqlLog;
 import com.ls.akong.mysql_proxy.model.SqlLogFilterModel;
@@ -108,7 +109,7 @@ public final class MyTableView extends JPanel {
         });
 
         // 将表格放置在 JScrollPane 中
-        JScrollPane scrollPane = new JScrollPane(table);
+        JScrollPane scrollPane = new JBScrollPane(table);
 
         // 设置布局
         setLayout(new BorderLayout());
