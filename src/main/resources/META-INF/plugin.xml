@@ -1,0 +1,59 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+    <id>com.ls.akong.mysql_proxy</id>
+
+    <!-- Public plugin name should be written in Title Case.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
+    <name>MySQL_proxy</name>
+
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor email="huangcong12@gmail.com" url="https://www.yourcompany.com">wuqing</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
+    <description>
+        <![CDATA[ Enter short description for your plugin here.<br> <em>most HTML tags may be used</em>]]></description>
+
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="MySQL Proxy" icon="/icons/logo.svg" anchor="bottom"
+                    factoryClass="com.ls.akong.mysql_proxy.ui.SqlToolWindowFactory"/>
+        <projectConfigurable
+                parentId="tools"
+                id="com.kong.mycompany.mysql_proxy.MysqlProxyConfigurable"
+                displayName="MySQL Proxy Settings"
+                instance="com.ls.akong.mysql_proxy.ui.MysqlProxyConfigurable"/>
+    </extensions>
+
+    <actions>
+        <group id="MysqlProxy.LeftToolbar" text="Left Tool Bar">
+            <action class="com.ls.akong.mysql_proxy.ui.action.RunOrStopServerAction" id="StopServer"
+                    text="Stop Sql Proxy Server" description="Stop sql proxy server"
+                    icon="com.intellij.execution.testframework.sm.runner.ui.SMPoolOfTestIcons.RUNNING_ICON"/>
+            <action class="com.ls.akong.mysql_proxy.ui.action.CleanSqlLogAction" id="CleanSqlLog"
+                    text="Clear All Sql Log"
+                    description="Clean up all sql logs in the record" icon="/icons/clean_all.svg"/>
+            <action class="com.ls.akong.mysql_proxy.ui.action.RecordingSwitchAction" id="RecordingSwitch"
+                    text="Pause/Record the Sql Log"
+                    description="Pause/record the sql log"
+                    icon="com.intellij.execution.testframework.sm.runner.ui.SMPoolOfTestIcons.RUNNING_ICON"/>
+            <action class="com.ls.akong.mysql_proxy.ui.action.SettingServerAction" id="SettingServer"
+                    text="Modify Run Configuration" description="Modify run configuration"
+                    icon="AllIcons.General.Settings"/>
+
+            <separator/>
+            <action class="com.ls.akong.mysql_proxy.ui.action.ScrollToTopAction" id="ScrollToTop"
+                    text="Scroll to Top of the Table"
+                    description="Scroll to Top of the Table" icon="AllIcons.Chooser.Top"/>
+        </group>
+
+        <group id="MysqlProxy.TopToolbar" text="Top Tool Bar"/>
+    </actions>
+</idea-plugin>
