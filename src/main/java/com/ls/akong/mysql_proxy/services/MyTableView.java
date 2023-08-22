@@ -286,7 +286,11 @@ public final class MyTableView extends JPanel {
          */
         public void nextPage() {
             List<SqlLog> list = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, getLastItemId(), 0, pageSize);
-            if (list.isEmpty()) {
+
+            // 时间段搜索的话，不分页
+            if (!Objects.equals(selectedTimeRange, "No Limit")) {
+                data.clear();
+                data.addAll(list);
                 return;
             }
 
