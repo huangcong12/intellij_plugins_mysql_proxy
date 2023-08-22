@@ -11,6 +11,7 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
 import java.util.Vector;
@@ -156,8 +157,10 @@ public class ConfigurableForm {
         // "Test Connection" button 监听
         testConnectionButton.addActionListener(e -> {
             // 处理按钮点击事件的逻辑
+            int timeoutMillis = 5000; // 设置超时时间为 5000 毫秒（5 秒）
             try {
-                Socket socket = new Socket(getTargetMysqlIpTextField(), Integer.parseInt(getTargetMysqlPortTextField()));
+                Socket socket = new Socket();
+                socket.connect(new InetSocketAddress(getTargetMysqlIpTextField(), Integer.parseInt(getTargetMysqlPortTextField())), timeoutMillis);
                 socket.close();
                 Messages.showInfoMessage("The MySQL connection and port are valid. You can proceed with the configuration.", "Connection Successful");
             } catch (Exception exception) {
