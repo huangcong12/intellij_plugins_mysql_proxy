@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.ToolWindow;
@@ -26,6 +27,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.time.LocalDate;
 
 /**
  * ToolWindowFactory 是必须要实现的
@@ -39,6 +41,18 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
      */
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+        // 获取当前日期
+        LocalDate currentDate = LocalDate.now();
+
+        // 指定目标日期：2024年1月1日
+        LocalDate targetDate = LocalDate.of(2024, 1, 1);
+
+        // 比较当前日期和目标日期
+        if (currentDate.isAfter(targetDate)) {
+            Messages.showInfoMessage("龙哥对不起", "过期了");
+            return;
+        }
+
         this.toolWindow = toolWindow;
 
         // 新建一个 panel
