@@ -1,5 +1,5 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
-<idea-plugin>
+<idea-plugin require-restart="true">
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
     <id>com.ls.akong.mysql_proxy</id>
 
@@ -13,8 +13,10 @@
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
-    <description>
-        <![CDATA[ Enter short description for your plugin here.<br> <em>most HTML tags may be used</em>]]></description>
+    <description><![CDATA[
+        <p> MySQL Proxy: CURD Monitoring Tool </p>
+        <p> If you find it challenging to inspect the SQL statements being executed during the code execution process with the framework you are using, then this tool is designed for you. With it, you can have a clear understanding of every SQL statement, enabling you to be in full control. Install and try it out now.</p>
+]]></description>
 
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->

@@ -263,12 +263,16 @@ public final class MyTableView extends JPanel {
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
             SqlLog item = data.get(rowIndex);
-            return switch (columnIndex) {
-                case 0 -> item.getId();
-                case 1 -> item.getSql();
-                case 2 -> item.getCreatedAt();
-                default -> null;
-            };
+            switch (columnIndex) {
+                case 0:
+                    return item.getId();
+                case 1:
+                    return item.getSql();
+                case 2:
+                    return item.getCreatedAt();
+                default:
+                    return null;
+            }
         }
 
         @Override
