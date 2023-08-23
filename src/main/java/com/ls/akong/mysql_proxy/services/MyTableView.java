@@ -89,6 +89,9 @@ public final class MyTableView extends JPanel {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     // 只设置选择，不显示菜单
                     int row = table.rowAtPoint(e.getPoint());
+                    if (row < 0) {
+                        return;
+                    }
                     int col = table.columnAtPoint(e.getPoint());
                     table.setRowSelectionInterval(row, row);
                     table.setColumnSelectionInterval(col, col);
@@ -99,6 +102,9 @@ public final class MyTableView extends JPanel {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     // 显示菜单
                     int row = table.rowAtPoint(e.getPoint());
+                    if (row < 0) {
+                        return;
+                    }
                     int col = table.columnAtPoint(e.getPoint());
                     table.setRowSelectionInterval(row, row);
                     table.setColumnSelectionInterval(col, col);
