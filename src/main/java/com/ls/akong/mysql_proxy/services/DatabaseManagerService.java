@@ -1,6 +1,7 @@
 package com.ls.akong.mysql_proxy.services;
 
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -25,8 +26,7 @@ public final class DatabaseManagerService implements Disposable {
 
         try {
             // TODO 开发过程中，换成非插件的目录
-//            String pluginDataDirPath = PathManager.getPluginsPath() + File.separator + "sql_proxy";
-            String pluginDataDirPath = "sql_proxy" + File.separator + project.getName() + File.separator;
+            String pluginDataDirPath = PathManager.getPluginsPath() + File.separator + "sql_proxy" + File.separator;
             File pluginDataDir = new File(pluginDataDirPath);
             if (!pluginDataDir.exists()) {
                 logger.info("create sqlite dir: " + pluginDataDirPath);
