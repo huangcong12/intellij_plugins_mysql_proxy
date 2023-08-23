@@ -213,34 +213,33 @@ public final class MySQLProxyServerService implements Disposable {
                 StringBuilder sqlBuilder = new StringBuilder(); // 用于存储SQL语句
 
                 while ((bytesRead = clientIn.read(buffer)) != -1) {
-                    // 将接收到的数据转换为字符串
-                    String requestData = new String(Arrays.copyOfRange(buffer, 4, bytesRead));
-                    sqlBuilder.append(requestData);
-                    String sqlQuery = sqlBuilder.toString().trim();
-                    // 去掉换行符、多个空格只保留一个
-                    sqlQuery = sqlQuery.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll(" +", " ");
+                    MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(project);
+                    if (recordingSwitch.isMonitorEnabled()) {
+                        // 将接收到的数据转换为字符串
+                        String requestData = new String(Arrays.copyOfRange(buffer, 4, bytesRead));
+                        sqlBuilder.append(requestData);
+                        String sqlQuery = sqlBuilder.toString().trim();
+                        // 去掉换行符、多个空格只保留一个
+                        sqlQuery = sqlQuery.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll(" +", " ");
 
-                    // 获取包头中的信息
-                    int sequenceNumber = buffer[3] & 0xFF;  // 序号
-                    // 只有第一个包的长度是准确的，如果分包会不准确，因此这样处理
-                    if (sequenceNumber == 0) {
-                        packetLength = (buffer[0] & 0xFF) | ((buffer[1] & 0xFF) << 8) | ((buffer[2] & 0xFF) << 16); // 数据包的长度
-                        commandByte = buffer[4] & 0xFF;     // 数据包中的命令字节
-                    }
+                        // 获取包头中的信息
+                        int sequenceNumber = buffer[3] & 0xFF;  // 序号
+                        // 只有第一个包的长度是准确的，如果分包会不准确，因此这样处理
+                        if (sequenceNumber == 0) {
+                            packetLength = (buffer[0] & 0xFF) | ((buffer[1] & 0xFF) << 8) | ((buffer[2] & 0xFF) << 16); // 数据包的长度
+                            commandByte = buffer[4] & 0xFF;     // 数据包中的命令字节
+                        }
 
-                    // !sqlQuery.equals("") 是客户端会发送 0 长度的包保存连接；sqlBuilder.length() >= packetLength - 4：满包，兼容长 sql，数据包分多个的情况
-                    if (!sqlQuery.equals("") && sqlBuilder.length() >= packetLength - 4) {
-                        // 只记录 Query 的到表里
-                        MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(project);
-                        if (recordingSwitch.isMonitorEnabled() && commandByte == 0x03) {
+                        // !sqlQuery.equals("") 是客户端会发送 0 长度的包保存连接；sqlBuilder.length() >= packetLength - 4：满包，兼容长 sql，数据包分多个的情况
+                        if (!sqlQuery.equals("") && sqlBuilder.length() >= packetLength - 4) {
                             SqlLogModel.insertLog(project, sqlQuery);
                             // 通知页面展示
                             MyTableView myTableView = MyTableView.getInstance(project);
                             myTableView.updateData();
-                        }
 
-                        // 重置收集器
-                        sqlBuilder.setLength(0);
+                            // 重置收集器
+                            sqlBuilder.setLength(0);
+                        }
                     }
 
                     // 准发给 mysql service
