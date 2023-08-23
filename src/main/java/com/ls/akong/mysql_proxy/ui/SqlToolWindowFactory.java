@@ -103,10 +103,10 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
         topToolbarPanel.add(timeRangeComboBox);
 
         // 刷新按钮
-        Presentation presentation = new Presentation();
-        presentation.setIcon(AllIcons.Actions.Refresh); // 设置图标
-        presentation.setText("Reload the Table Data");
-        topToolbarPanel.add(new ActionButton(new RefreshTableViewAction(), presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE));
+//        Presentation presentation = new Presentation();
+//        presentation.setIcon(AllIcons.Actions.Refresh); // 设置图标
+//        presentation.setText("Reload the Table Data");
+//        topToolbarPanel.add(new ActionButton(new RefreshTableViewAction(), presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE));
 
         JBSplitter sqlListSplitter = new JBSplitter(true, 0.01f);
         // 顶部按钮
