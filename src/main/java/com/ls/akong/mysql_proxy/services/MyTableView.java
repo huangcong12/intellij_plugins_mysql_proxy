@@ -8,7 +8,6 @@ import com.intellij.ui.table.JBTable;
 import com.ls.akong.mysql_proxy.entity.SqlLog;
 import com.ls.akong.mysql_proxy.model.SqlLogFilterModel;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
-import icons.CollaborationToolsIcons;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -50,7 +49,7 @@ public final class MyTableView extends JPanel {
             clipboard.setContents(stringSelection, null);
         });
         // 删除
-        JMenuItem deleteItem = new JMenuItem("Delete", CollaborationToolsIcons.DeleteHovered);
+        JMenuItem deleteItem = new JMenuItem("Delete", AllIcons.Actions.DeleteTag);
         deleteItem.addActionListener(e -> {
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {

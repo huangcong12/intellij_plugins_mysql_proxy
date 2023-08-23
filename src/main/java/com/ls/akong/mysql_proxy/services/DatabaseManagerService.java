@@ -25,7 +25,6 @@ public final class DatabaseManagerService implements Disposable {
     public DatabaseManagerService(@NotNull Project project) {
 
         try {
-            // TODO 开发过程中，换成非插件的目录
             String pluginDataDirPath = PathManager.getPluginsPath() + File.separator + "sql_proxy" + File.separator;
             File pluginDataDir = new File(pluginDataDirPath);
             if (!pluginDataDir.exists()) {

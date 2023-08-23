@@ -1,6 +1,5 @@
 package com.ls.akong.mysql_proxy.ui.action;
 
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
@@ -25,10 +24,5 @@ public class ScrollToTopAction extends AnAction {
             MyTableView myTableView = MyTableView.getInstance(project);
             myTableView.scrollToTop();
         }
-    }
-
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.BGT;
     }
 }

@@ -53,9 +53,12 @@
             <separator/>
             <action class="com.ls.akong.mysql_proxy.ui.action.ScrollToTopAction" id="ScrollToTop"
                     text="Scroll to Top of the Table"
-                    description="Scroll to Top of the Table" icon="AllIcons.Chooser.Top"/>
+                    description="Scroll to Top of the Table" icon="/icons/top.svg"/>
         </group>
 
-        <group id="MysqlProxy.TopToolbar" text="Top Tool Bar"/>
+        <group id="MysqlProxy.TopToolbar" text="Top Tool Bar">
+            <action id="RefreshTableViewActionId" class="com.ls.akong.mysql_proxy.ui.action.RefreshTableViewAction"
+                    text="Reload the Table Data" icon="AllIcons.Actions.Refresh"/>
+        </group>
     </actions>
 </idea-plugin>

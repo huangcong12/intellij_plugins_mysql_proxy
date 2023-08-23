@@ -1,6 +1,5 @@
 package com.ls.akong.mysql_proxy.ui.action;
 
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
@@ -33,12 +32,6 @@ public class RecordingSwitchAction extends AnAction {
         super.update(e);
         updateIcon(e);
     }
-
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.BGT;
-    }
-
 
     private void updateIcon(AnActionEvent e) {
         // 使用 SwingUtilities.invokeLater() 方法
