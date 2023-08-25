@@ -25,7 +25,7 @@ public final class DatabaseManagerService implements Disposable {
     public DatabaseManagerService(@NotNull Project project) {
 
         try {
-            String pluginDataDirPath = PathManager.getPluginsPath() + File.separator + "sql_proxy" + File.separator;
+            String pluginDataDirPath = PathManager.getPluginsPath() + File.separator + "sql_proxy" + File.separator + project.getName() + File.separator;
             File pluginDataDir = new File(pluginDataDirPath);
             if (!pluginDataDir.exists()) {
                 logger.info("create sqlite dir: " + pluginDataDirPath);
