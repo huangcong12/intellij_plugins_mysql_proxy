@@ -73,10 +73,7 @@ public final class MySQLProxyServerService implements Disposable {
             try (ServerSocket ignored = new ServerSocket(port)) {
                 // If binding succeeds, the port is available
             } catch (BindException bindException) {     // 端口占用
-                String errorMessage = "Run Failed, Error Message:\n" + bindException.getMessage() + "\n\n" +
-                        "Possible Reasons for the Failure:\n" +
-                        "1. Port " + port + " already in use. Please modify to a different port and retry.\n" +
-                        "2. Insufficient port binding permissions. If you're using a Linux-based system, consider using a port between 1024 and 65535.";
+                String errorMessage = "Run Failed, Error Message:\n" + bindException.getMessage() + "\n\n" + "Possible Reasons for the Failure:\n" + "1. Port " + port + " already in use. Please modify to a different port and retry.\n" + "2. Insufficient port binding permissions. If you're using a Linux-based system, consider using a port between 1024 and 65535.";
                 String errorTitle = "Proxy Listener Port Conflict Error";
                 logger.error(bindException.getMessage(), bindException);
                 Messages.showErrorDialog(errorMessage, errorTitle);
@@ -227,16 +224,18 @@ public final class MySQLProxyServerService implements Disposable {
                         // 只有第一个包的长度是准确的，如果分包会不准确，因此这样处理
                         if (sequenceNumber == 0) {
                             packetLength = (buffer[0] & 0xFF) | ((buffer[1] & 0xFF) << 8) | ((buffer[2] & 0xFF) << 16); // 数据包的长度
-                            commandByte = buffer[4] & 0xFF;     // 数据包中的命令字节
+                            commandByte = buffer[4] & 0xFF;     // 数据包中的命令字节。这个字段不能信任，比如 wordpress 这个字段都是 3（query）
                         }
 
                         if (!sqlQuery.equals("")    // !sqlQuery.equals("") 是客户端会发送 0 长度的包保存连接；
                                 && sqlBuilder.length() >= packetLength - 4  // sqlBuilder.length() >= packetLength - 4：满包，兼容长 sql，数据包分多个的情况
                         ) {
-                            SqlLogModel.insertLog(project, sqlQuery);
-                            // 通知页面展示
-                            MyTableView myTableView = MyTableView.getInstance(project);
-                            myTableView.updateData();
+                            if (!sqlQuery.contains("mysql_native_password")) { // mysql_native_password 是发送账号密码
+                                SqlLogModel.insertLog(project, sqlQuery);
+                                // 通知页面展示
+                                MyTableView myTableView = MyTableView.getInstance(project);
+                                myTableView.updateData();
+                            }
 
                             // 重置收集器
                             sqlBuilder.setLength(0);
