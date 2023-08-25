@@ -38,7 +38,7 @@ public final class MyTableView extends JPanel {
         // 增加右键菜单
         JPopupMenu popupMenu = new JPopupMenu();
         // 复制
-        JMenuItem copyItem = new JMenuItem("Copy", AllIcons.Actions.Copy);
+        JMenuItem copyItem = new JMenuItem("Copy Sql", AllIcons.Actions.Copy);
         copyItem.addActionListener(e -> {
             // 复制当前选中的单元格的数据
             int row = table.getSelectedRow();
