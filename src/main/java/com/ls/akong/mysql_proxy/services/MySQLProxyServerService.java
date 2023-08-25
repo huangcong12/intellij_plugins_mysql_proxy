@@ -216,7 +216,7 @@ public final class MySQLProxyServerService implements Disposable {
                     MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(project);
                     if (recordingSwitch.isMonitorEnabled()) {
                         // 将接收到的数据转换为字符串
-                        String requestData = new String(Arrays.copyOfRange(buffer, 4, bytesRead));
+                        String requestData = new String(Arrays.copyOfRange(buffer, 5, bytesRead));
                         sqlBuilder.append(requestData);
                         String sqlQuery = sqlBuilder.toString().trim();
                         // 去掉换行符、多个空格只保留一个
@@ -230,8 +230,9 @@ public final class MySQLProxyServerService implements Disposable {
                             commandByte = buffer[4] & 0xFF;     // 数据包中的命令字节
                         }
 
-                        // !sqlQuery.equals("") 是客户端会发送 0 长度的包保存连接；sqlBuilder.length() >= packetLength - 4：满包，兼容长 sql，数据包分多个的情况
-                        if (!sqlQuery.equals("") && sqlBuilder.length() >= packetLength - 4) {
+                        if (!sqlQuery.equals("")    // !sqlQuery.equals("") 是客户端会发送 0 长度的包保存连接；
+                                && sqlBuilder.length() >= packetLength - 4  // sqlBuilder.length() >= packetLength - 4：满包，兼容长 sql，数据包分多个的情况
+                        ) {
                             SqlLogModel.insertLog(project, sqlQuery);
                             // 通知页面展示
                             MyTableView myTableView = MyTableView.getInstance(project);
