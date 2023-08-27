@@ -92,7 +92,7 @@ public class SqlLogModel {
             }
         }
 
-        querySQL += " ORDER BY id DESC";
+        querySQL += " AND sql NOT IN (SELECT sql FROM sql_log_filter) ORDER BY id DESC";
 
         // 不是前增、时间搜索的，才用分页
         if (maxLimitId > 0 || selectedTimeRange.equals("No Limit")) {
