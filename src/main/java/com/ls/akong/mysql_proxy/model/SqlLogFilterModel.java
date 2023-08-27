@@ -3,22 +3,22 @@ package com.ls.akong.mysql_proxy.model;
 import com.intellij.openapi.project.Project;
 import com.ls.akong.mysql_proxy.entity.SqlLogFilter;
 import com.ls.akong.mysql_proxy.services.DatabaseManagerService;
+import org.h2.jdbc.JdbcPreparedStatement;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SqlLogFilterModel {
     public static void insertLogFilter(Project project, String sql) {
-        String insertSQL = "INSERT INTO sql_log_filter (sql,created_at) VALUES (?, ?)";
+        String insertSQL = "INSERT INTO sql_log_filter (sql, created_at) VALUES (?, ?)";
 
-        DatabaseManagerService databaseManger = project.getService(DatabaseManagerService.class);
-        try (PreparedStatement preparedStatement = databaseManger.getConnection().prepareStatement(insertSQL)) {
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(insertSQL)) {
             preparedStatement.setString(1, sql);
-            preparedStatement.setDouble(2, System.currentTimeMillis());
+            preparedStatement.setLong(2, System.currentTimeMillis());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -27,10 +27,11 @@ public class SqlLogFilterModel {
 
     public static List<SqlLogFilter> querySqlLogFilter(Project project) {
         List<SqlLogFilter> logEntries = new ArrayList<>();
-        String querySQL = "SELECT * FROM sql_log_filter ORDER BY id DESC ";
+        String querySQL = "SELECT * FROM sql_log_filter ORDER BY id DESC";
 
-        DatabaseManagerService databaseManger = project.getService(DatabaseManagerService.class);
-        try (Statement statement = databaseManger.getConnection().createStatement(); ResultSet resultSet = statement.executeQuery(querySQL)) {
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(querySQL);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String sql = resultSet.getString("sql");
@@ -47,8 +48,8 @@ public class SqlLogFilterModel {
     public static void deleteDataById(Project project, int id) {
         String sql = "DELETE FROM sql_log_filter WHERE id = ?";
 
-        DatabaseManagerService databaseManger = project.getService(DatabaseManagerService.class);
-        try (PreparedStatement preparedStatement = databaseManger.getConnection().prepareStatement(sql)) {
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(sql)) {
             preparedStatement.setInt(1, id);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -69,14 +70,13 @@ public class SqlLogFilterModel {
         }
     }
 
-
     /**
      * 建表 SQL
      */
     public static String getCreateTableSql() {
         return "CREATE TABLE IF NOT EXISTS sql_log_filter (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "sql TEXT, " +
-                "created_at REAL)";
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                "sql VARCHAR(2000), " +
+                "created_at BIGINT)";
     }
 }

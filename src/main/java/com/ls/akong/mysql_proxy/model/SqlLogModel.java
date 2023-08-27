@@ -4,6 +4,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.ls.akong.mysql_proxy.entity.SqlLog;
 import com.ls.akong.mysql_proxy.services.DatabaseManagerService;
+import org.h2.jdbc.JdbcPreparedStatement;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,7 +39,7 @@ public class SqlLogModel {
                     PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(insertSQL);
                     for (String sql : newLogCopy) {
                         preparedStatement.setString(1, sql);
-                        preparedStatement.setDouble(2, System.currentTimeMillis());
+                        preparedStatement.setLong(2, System.currentTimeMillis());
                         preparedStatement.addBatch();
                     }
                     preparedStatement.executeBatch();
@@ -48,19 +49,6 @@ public class SqlLogModel {
             }
         }, 100); // 在100ms后执行
     }
-
-//    public void updateLog(int id, String newStatus, int newSpendTime) {
-//        String updateSQL = "UPDATE sql_log SET status = ?, spend_time = ? WHERE id = ?";
-//
-//        try (PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(updateSQL)) {
-//            preparedStatement.setString(1, newStatus);
-//            preparedStatement.setInt(2, newSpendTime);
-//            preparedStatement.setInt(3, id);
-//            preparedStatement.executeUpdate();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     public static List<SqlLog> queryLogs(Project project, String searchText, String selectedTimeRange, int maxLimitId, int minLimitId, int pageSize) {
         List<SqlLog> logEntries = new ArrayList<>();
@@ -104,8 +92,6 @@ public class SqlLogModel {
             }
         }
 
-        querySQL += " AND sql NOT IN (SELECT sql FROM sql_log_filter)";
-
         querySQL += " ORDER BY id DESC";
 
         // 不是前增、时间搜索的，才用分页
@@ -114,8 +100,9 @@ public class SqlLogModel {
         }
         logger.info("sql: " + querySQL);
 
-        DatabaseManagerService databaseManger = project.getService(DatabaseManagerService.class);
-        try (Statement statement = databaseManger.getConnection().createStatement(); ResultSet resultSet = statement.executeQuery(querySQL)) {
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(querySQL);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String sql = resultSet.getString("sql");
@@ -134,11 +121,10 @@ public class SqlLogModel {
         if (!Objects.equals(searchText, "")) {
             insertSQL += " AND sql LIKE '%" + searchText + "%'";
         }
-        insertSQL += "AND sql NOT IN (SELECT sql FROM sql_log_filter)";
         logger.info("getById sql: " + insertSQL);
 
-        DatabaseManagerService databaseManger = project.getService(DatabaseManagerService.class);
-        try (PreparedStatement preparedStatement = databaseManger.getConnection().prepareStatement(insertSQL)) {
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(insertSQL)) {
             preparedStatement.setInt(1, id);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -159,10 +145,10 @@ public class SqlLogModel {
 
     // 重置 sql log 表，并且 id 从 1 开始
     public static void truncateSqlLog(Project project) {
-        String truncateSQL = "DELETE FROM sql_log;UPDATE sqlite_sequence SET seq = 0 WHERE name = 'sql_log'";
+        String truncateSQL = "TRUNCATE TABLE sql_log RESTART IDENTITY";
 
-        DatabaseManagerService databaseManger = project.getService(DatabaseManagerService.class);
-        try (Statement statement = databaseManger.getConnection().createStatement()) {
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+        try (Statement statement = databaseManager.getConnection().createStatement()) {
             statement.executeUpdate(truncateSQL);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -173,14 +159,14 @@ public class SqlLogModel {
      * 建表 SQL
      */
     public static String getCreateTableSql() {
-        return "CREATE TABLE IF NOT EXISTS sql_log (id INTEGER PRIMARY KEY AUTOINCREMENT,sql TEXT,created_at REAL)";
+        return "CREATE TABLE IF NOT EXISTS sql_log (id INT AUTO_INCREMENT PRIMARY KEY, sql VARCHAR(2000), created_at BIGINT)";
     }
 
     public static void deleteDataById(Project project, int id) {
         String sql = "DELETE FROM sql_log WHERE id = ?";
 
-        DatabaseManagerService databaseManger = project.getService(DatabaseManagerService.class);
-        try (PreparedStatement preparedStatement = databaseManger.getConnection().prepareStatement(sql)) {
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(sql)) {
             preparedStatement.setInt(1, id);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {

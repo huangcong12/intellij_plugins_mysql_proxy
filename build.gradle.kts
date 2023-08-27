@@ -22,7 +22,7 @@ intellij {
 
 dependencies {
     // https://mvnrepository.com/artifact/com.github.shyiko/mysql-binlog-connector-java
-    implementation("org.xerial:sqlite-jdbc:3.34.0")
+    implementation("com.h2database:h2:1.4.200")
 }
 
 tasks {

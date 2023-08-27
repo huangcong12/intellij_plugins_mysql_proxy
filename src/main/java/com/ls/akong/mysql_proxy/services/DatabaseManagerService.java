@@ -9,10 +9,10 @@ import com.intellij.openapi.ui.Messages;
 import com.ls.akong.mysql_proxy.model.SqlLogFilterModel;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
 import org.jetbrains.annotations.NotNull;
+import org.h2.jdbcx.JdbcDataSource;
 
 import java.io.File;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -28,21 +28,23 @@ public final class DatabaseManagerService implements Disposable {
             String pluginDataDirPath = PathManager.getPluginsPath() + File.separator + "sql_proxy" + File.separator + project.getName() + File.separator;
             File pluginDataDir = new File(pluginDataDirPath);
             if (!pluginDataDir.exists()) {
-                logger.info("create sqlite dir: " + pluginDataDirPath);
+                logger.info("create H2 database dir: " + pluginDataDirPath);
                 if (!pluginDataDir.mkdirs()) {
                     logger.error("Failed to create folder: " + pluginDataDirPath);
                     Messages.showErrorDialog("Failed to create folder: " + pluginDataDirPath, "Error Creating");
                 }
             }
 
-            String dbFilePath = pluginDataDirPath + File.separator + "database.db";
-            logger.info("db file: " + dbFilePath);
+            String dbFilePath = pluginDataDirPath + File.separator + "h2database";
+            logger.info("H2 database file: " + dbFilePath);
 
-            // 加载 SQLite 驱动
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + dbFilePath);
+            // 使用 H2 数据库的 JDBC DataSource 进行连接
+            JdbcDataSource dataSource = new JdbcDataSource();
+            dataSource.setURL("jdbc:h2:" + dbFilePath);
+            connection = dataSource.getConnection();
             createTableIfNotExists();   // 创建表（如果不存在）
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
+            logger.error("H2 database initialization fail " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -55,10 +57,10 @@ public final class DatabaseManagerService implements Disposable {
         try {
             if (connection != null) {
                 connection.close();
-                logger.info("close sqlite connection success");
+                logger.info("close H2 database connection success");
             }
         } catch (SQLException e) {
-            logger.error("close sqlite connection fail " + e.getMessage());
+            logger.error("close H2 database connection fail " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -71,9 +73,9 @@ public final class DatabaseManagerService implements Disposable {
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(createSqlLogTable);
             statement.executeUpdate(createSqlLogFilterTable);
-            logger.info("exec create table sql success");
+            logger.info("exec create table SQL success");
         } catch (SQLException e) {
-            logger.error("exec create table sql fail " + e.getMessage());
+            logger.error("exec create table SQL fail " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -83,7 +85,7 @@ public final class DatabaseManagerService implements Disposable {
      */
     @Override
     public void dispose() {
-        logger.info("closing sqlite connection");
+        logger.info("closing H2 database connection");
         close();
     }
 }
