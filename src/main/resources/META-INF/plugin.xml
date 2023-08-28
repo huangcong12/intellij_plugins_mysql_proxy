@@ -10,6 +10,9 @@
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor email="huangcong12@gmail.com" url="https://www.yourcompany.com">wuqing</vendor>
 
+    <product-descriptor code="PMYSQLPROXY" release-date="20230828" release-version="20231"/>
+    <version>2023.1.1</version>
+
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
