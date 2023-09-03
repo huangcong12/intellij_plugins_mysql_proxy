@@ -78,13 +78,13 @@
         </ul>
         <br/>
         <strong> Q: My SQL logs appear as garbled text. How can I resolve this?</strong>
-        <p> A: The database packets are encrypted. To resolve this, add "useSSL=false" to your MySQL configuration, like this: "jdbc:mysql://localhost:3309?useSSL=false".</p>
+        <p> A: The database packets are encrypted. Please add the parameter "useSSL=false" to your MySQL connection, like this: "jdbc:mysql://localhost:3309?useSSL=false."</p>
         <br/>
         <strong> Q: What versions of MySQL are supported?</strong>
-        <p> A: We have tested with MySQL 5.7 and MySQL 8.0. It should support all databases using the MySQL protocol, such as MariaDB and TiDB.</p>
+        <p> A: We have tested it with MySQL 5.7 and MySQL 8.0, and theoretically, it should support all databases using the MySQL protocol, such as MariaDB and TiDB.</p>
         <br/>
         <strong> Q: Can I use my own custom framework with this?</strong>
-        <p> A: You can give it a try. If you find that SQL logs are garbled, add the parameter "useSSL=false" to your configuration, like this: "jdbc:mysql://localhost:3309?useSSL=false". If it still doesn't work, it might not be supported. You can provide us with your process and results, and we will work on optimizations in the next version.</p>
+        <p> A: We recommend giving it a try. If you find that SQL logs appear as garbled text, please add the parameter "useSSL=false" to your configuration, like this: "jdbc:mysql://localhost:3309?useSSL=false." If it still doesn't work, it might not be supported. You can provide us with your process and results, and we will work on optimizations in the next version.</p>
 
 ]]></description>
 
