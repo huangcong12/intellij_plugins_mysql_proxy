@@ -76,7 +76,7 @@ public class SqlLogFilterModel {
     public static String getCreateTableSql() {
         return "CREATE TABLE IF NOT EXISTS sql_log_filter (" +
                 "id INT AUTO_INCREMENT PRIMARY KEY, " +
-                "sql VARCHAR(2000), " +
+                "sql CLOB, " +
                 "created_at BIGINT)";
     }
 }

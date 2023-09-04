@@ -159,7 +159,7 @@ public class SqlLogModel {
      * 建表 SQL
      */
     public static String getCreateTableSql() {
-        return "CREATE TABLE IF NOT EXISTS sql_log (id INT AUTO_INCREMENT PRIMARY KEY, sql VARCHAR(2000), created_at BIGINT)";
+        return "CREATE TABLE IF NOT EXISTS sql_log (id INT AUTO_INCREMENT PRIMARY KEY, sql CLOB, created_at BIGINT)";
     }
 
     public static void deleteDataById(Project project, int id) {
