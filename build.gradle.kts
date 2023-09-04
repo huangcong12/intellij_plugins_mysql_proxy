@@ -5,7 +5,12 @@ plugins {
 }
 
 group = "com.ls.akong"
-version = "1.0"
+version = project.property("version")
+val javaVersion = project.property("javaVersion") as String
+val ideaVersion = project.property("ideaVersion") as String
+val ideaTarget = project.property("ideaTarget") as String
+val ideaSinceBuild = project.property("ideaSinceBuild") as String
+val ideaUntilBuild = project.property("ideaUntilBuild") as String
 
 repositories {
   mavenCentral()
@@ -14,10 +19,12 @@ repositories {
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-  version.set("2020.3.4")
-  type.set("IC") // Target IDE Platform
+  version.set(ideaVersion)
+  type.set(ideaTarget) // Target IDE Platform
 
   plugins.set(listOf(/* Plugin Dependencies */))
+
+  pluginName.set("MySQL Proxy")
 }
 
 dependencies {
@@ -28,16 +35,13 @@ dependencies {
 tasks {
   // Set the JVM compatibility versions
   withType<JavaCompile> {
-    sourceCompatibility = "11"
-    targetCompatibility = "11"
-  }
-  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
   }
 
   patchPluginXml {
-    sinceBuild.set("203")
-    untilBuild.set("232.*")
+    sinceBuild.set(ideaSinceBuild)
+    untilBuild.set(ideaUntilBuild)
   }
 
   signPlugin {
