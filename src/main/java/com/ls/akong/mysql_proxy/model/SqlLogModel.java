@@ -4,50 +4,66 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.ls.akong.mysql_proxy.entity.SqlLog;
 import com.ls.akong.mysql_proxy.services.DatabaseManagerService;
-import org.h2.jdbc.JdbcPreparedStatement;
+import com.ls.akong.mysql_proxy.services.MyTableView;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class SqlLogModel {
     private static final Logger logger = Logger.getInstance(SqlLogModel.class);
-    private static Timer debounceTimer = new Timer();
+    private static final int INSERT_INTERVAL_MS = 100;
 
-    private static final List<String> newLog = new ArrayList<>();
+    private static final BlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
+
+    private static Thread logInsertThread;
 
     public static void insertLog(Project project, String sql) {
-        newLog.add(sql);
+        // Add the log message to the queue
+        logQueue.offer(sql);
 
-        // 取消之前的定时任务
-        debounceTimer.cancel();
+        // If the logInsertThread is not running, start it
+        if (logInsertThread == null || !logInsertThread.isAlive()) {
+            logInsertThread = new Thread(() -> {
+                while (true) {
+                    try {
+                        // Get the log message from the queue and insert it into the database
+                        String logMessage = logQueue.poll(INSERT_INTERVAL_MS, TimeUnit.MILLISECONDS);
+                        if (logMessage != null) {
+                            insertLogIntoDatabase(project, logMessage);
 
-        // 创建一个新的定时任务，在100ms后执行通知操作
-        debounceTimer = new Timer();
-        debounceTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                List<String> newLogCopy = new ArrayList<>(newLog);
-                newLog.clear();
-
-                String insertSQL = "INSERT INTO sql_log (sql, created_at) VALUES (?, ?)";
-
-                DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
-                try {
-                    PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(insertSQL);
-                    for (String sql : newLogCopy) {
-                        preparedStatement.setString(1, sql);
-                        preparedStatement.setLong(2, System.currentTimeMillis());
-                        preparedStatement.addBatch();
+                            // 通知页面展示
+                            MyTableView myTableView = MyTableView.getInstance(project);
+                            myTableView.updateData();
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                    preparedStatement.executeBatch();
-                } catch (SQLException e) {
-                    e.printStackTrace();
                 }
-            }
-        }, 100); // 在100ms后执行
+            });
+            logInsertThread.start();
+        }
+    }
+
+    private static void insertLogIntoDatabase(Project project, String sql) {
+        String insertSQL = "INSERT INTO sql_log (sql, created_at) VALUES (?, ?)";
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+
+        try {
+            PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(insertSQL);
+            preparedStatement.setString(1, sql);
+            preparedStatement.setLong(2, System.currentTimeMillis());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static List<SqlLog> queryLogs(Project project, String searchText, String selectedTimeRange, int maxLimitId, int minLimitId, int pageSize) {
@@ -94,8 +110,8 @@ public class SqlLogModel {
 
         querySQL += " AND sql NOT IN (SELECT sql FROM sql_log_filter) ORDER BY id DESC";
 
-        // 不是前增、时间搜索的，才用分页
-        if (maxLimitId > 0 || selectedTimeRange.equals("No Limit")) {
+        // 非前增、时间搜索的，才用分页
+        if (minLimitId == 0 && selectedTimeRange.equals("No Limit")) {
             querySQL += " LIMIT 0," + pageSize;
         }
         logger.info("sql: " + querySQL);
