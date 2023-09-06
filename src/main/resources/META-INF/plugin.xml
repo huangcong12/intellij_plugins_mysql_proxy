@@ -140,6 +140,10 @@
             <action class="com.ls.akong.mysql_proxy.ui.action.ScrollToTopAction" id="ScrollToTop"
                     text="Scroll to Top of the Table"
                     description="Scroll to Top of the Table" icon="/icons/top.svg"/>
+
+            <action class="com.ls.akong.mysql_proxy.ui.action.CheckDataAction" id="CheckData"
+                    text="开发用：检查 Table View Data 是否有重复的，如果您看到了这个按钮，说明打包有误，请忽略"
+                    description="Scroll to Top of the Table" icon="AllIcons.Debugger.AttachToProcess"/>
         </group>
     </actions>
 </idea-plugin>
