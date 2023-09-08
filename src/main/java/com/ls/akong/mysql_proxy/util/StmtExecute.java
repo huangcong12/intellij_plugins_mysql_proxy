@@ -44,9 +44,9 @@ public class StmtExecute {
         for (int i = 0; i < paramsType.size(); i++) {
             int paramType = paramsType.get(i);
             switch (paramType) {
-                case MySQLFields.FIELD_TYPE_TINY:
-                    paramsList[i] = packetData[position++];
-                    break;
+//                case MySQLFields.FIELD_TYPE_TINY:
+//                    paramsList[i] = packetData[position++];
+//                    break;
                 case MySQLFields.FIELD_TYPE_LONGLONG:       // 数据库字段是 int、tinyint 会走这里
                     paramsList[i] = packetData[position++] & 0xff | (packetData[position++] & 0xff) << 8 | (packetData[position++] & 0xff) << 16 | (packetData[position++] & 0xff) << 24 | (packetData[position++] & 0xff) << 32 | (packetData[position++] & 0xff) << 40 | (packetData[position++] & 0xff) << 48 | (packetData[position] & 0xff) << 56;
                     break;
@@ -56,8 +56,13 @@ public class StmtExecute {
                     // 参数长度
                     int paramLength = packetData[position++];
 
-                    paramsList[i] = "`" + new String(Arrays.copyOfRange(packetData, position, (position += paramLength))) + "`";
+                    paramsList[i] = "`" + new String(Arrays.copyOfRange(packetData, position, (position += paramLength - 1))) + "`";
                     break;
+            }
+
+            // 如果还有参数，则帮忙加到下一个的开始，因为需要考虑最后一个，不能再进行 position++ 的情况
+            if (packetData.length > position) {
+                position += 1;
             }
         }
 
