@@ -1,8 +1,8 @@
 package com.ls.akong.mysql_proxy.ui;
 
-import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.*;
-import com.intellij.openapi.actionSystem.impl.ActionButton;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
@@ -17,9 +17,7 @@ import com.intellij.ui.content.ContentManager;
 import com.ls.akong.mysql_proxy.services.MySQLProxyServerService;
 import com.ls.akong.mysql_proxy.services.MyTableView;
 import com.ls.akong.mysql_proxy.services.MysqlProxyServiceStateListener;
-import com.ls.akong.mysql_proxy.services.MysqlProxySettings;
 import com.ls.akong.mysql_proxy.ui.action.RecordingSwitchAction;
-import com.ls.akong.mysql_proxy.ui.action.RefreshTableViewAction;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -102,12 +100,6 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
         topToolbarPanel.add(new JLabel("Time Range:"));
         topToolbarPanel.add(timeRangeComboBox);
 
-        // 刷新按钮
-//        Presentation presentation = new Presentation();
-//        presentation.setIcon(AllIcons.Actions.Refresh); // 设置图标
-//        presentation.setText("Reload the Table Data");
-//        topToolbarPanel.add(new ActionButton(new RefreshTableViewAction(), presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE));
-
         JBSplitter sqlListSplitter = new JBSplitter(true, 0.01f);
         // 顶部按钮
         sqlListSplitter.setFirstComponent(topToolbarPanel);
@@ -131,11 +123,6 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
         // 监听代理服务器状态
         MySQLProxyServerService proxyServer = project.getService(MySQLProxyServerService.class);
         proxyServer.addListener(this);  // 增加订阅状态变化
-
-        // 跟随编辑器启动
-        if (MysqlProxySettings.getInstance(project).isStartWithEditor()) {
-            proxyServer.startService();
-        }
     }
 
     /**

@@ -159,6 +159,9 @@ public final class MySQLProxyServerService implements Disposable {
     public void addListener(MysqlProxyServiceStateListener listener) {
         if (!listeners.contains(listener)) {
             listeners.add(listener);
+
+            // 马上通知一遍，因为跟随编辑器启动的逻辑运行比较早，那时候还没有订阅，因此需要马上通知一遍，更改图标
+            notifyListeners();
         }
     }
 
