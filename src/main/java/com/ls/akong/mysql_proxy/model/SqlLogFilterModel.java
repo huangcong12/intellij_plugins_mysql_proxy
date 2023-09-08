@@ -3,7 +3,6 @@ package com.ls.akong.mysql_proxy.model;
 import com.intellij.openapi.project.Project;
 import com.ls.akong.mysql_proxy.entity.SqlLogFilter;
 import com.ls.akong.mysql_proxy.services.DatabaseManagerService;
-import org.h2.jdbc.JdbcPreparedStatement;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

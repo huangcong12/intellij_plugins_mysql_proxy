@@ -10,9 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -21,25 +19,32 @@ public class SqlLogModel {
     private static final Logger logger = Logger.getInstance(SqlLogModel.class);
     private static final int INSERT_INTERVAL_MS = 100;
 
-    private static final BlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
-
-    private static Thread logInsertThread;
+    private static Map<String, BlockingQueue<String>> projectLogQueues = new HashMap<>();
+    private static Map<String, Thread> logInsertThreads = new HashMap<>();
 
     public static void insertLog(Project project, String sql) {
-        // Add the log message to the queue
-        logQueue.offer(sql);
+        // Get the project name
+        String projectName = project.getName();
 
-        // If the logInsertThread is not running, start it
-        if (logInsertThread == null || !logInsertThread.isAlive()) {
-            logInsertThread = new Thread(() -> {
+        // Check if a queue for this project already exists
+        BlockingQueue<String> logQueue = projectLogQueues.get(projectName);
+
+        if (logQueue == null) {
+            // Create a new queue for this project
+            logQueue = new LinkedBlockingQueue<>();
+            projectLogQueues.put(projectName, logQueue);
+
+            // Start a new thread for this project
+            BlockingQueue<String> finalLogQueue = logQueue;
+            Thread logInsertThread = new Thread(() -> {
                 while (true) {
                     try {
                         // Get the log message from the queue and insert it into the database
-                        String logMessage = logQueue.poll(INSERT_INTERVAL_MS, TimeUnit.MILLISECONDS);
+                        String logMessage = finalLogQueue.poll(INSERT_INTERVAL_MS, TimeUnit.MILLISECONDS);
                         if (logMessage != null) {
                             insertLogIntoDatabase(project, logMessage);
 
-                            // 通知页面展示
+                            // Notify the UI to update for the specified project
                             MyTableView myTableView = MyTableView.getInstance(project);
                             myTableView.updateData();
                         }
@@ -49,7 +54,13 @@ public class SqlLogModel {
                 }
             });
             logInsertThread.start();
+
+            // Store the thread in the map for future use
+            logInsertThreads.put(projectName, logInsertThread);
         }
+
+        // Add the log message to the project's queue
+        logQueue.offer(sql);
     }
 
     private static void insertLogIntoDatabase(Project project, String sql) {
