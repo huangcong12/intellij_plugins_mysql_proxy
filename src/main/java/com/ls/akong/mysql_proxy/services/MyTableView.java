@@ -310,5 +310,9 @@ public final class MyTableView extends JPanel {
                 }
             }
         }
+
+        public List<SqlLog> data() {
+            return data;
+        }
     }
 }

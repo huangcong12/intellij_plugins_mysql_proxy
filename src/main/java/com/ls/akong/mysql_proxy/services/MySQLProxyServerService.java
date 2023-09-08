@@ -6,6 +6,8 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
+import com.ls.akong.mysql_proxy.util.MySQLMessage;
+import com.ls.akong.mysql_proxy.util.SqlBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -205,40 +207,25 @@ public final class MySQLProxyServerService implements Disposable {
 
                 byte[] buffer = new byte[4096];
                 int bytesRead;
-                int packetLength = 0;
-                int commandByte = 0;
-                StringBuilder sqlBuilder = new StringBuilder(); // 用于存储SQL语句
+                SqlBuilder sqlBuilder = new SqlBuilder();
 
                 while ((bytesRead = clientIn.read(buffer)) != -1) {
                     MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(project);
                     if (recordingSwitch.isMonitorEnabled()) {
-                        // 将接收到的数据转换为字符串
-                        String requestData = new String(Arrays.copyOfRange(buffer, 5, bytesRead));
-                        sqlBuilder.append(requestData);
-                        String sqlQuery = sqlBuilder.toString().trim();
-                        // 去掉换行符、多个空格只保留一个
-                        sqlQuery = sqlQuery.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll(" +", " ");
+                        byte[] rawBuffer = Arrays.copyOfRange(buffer, 0, bytesRead);
+                        MySQLMessage mm = new MySQLMessage(rawBuffer, sqlBuilder);
 
                         // 获取包头中的信息
-                        int sequenceNumber = buffer[3] & 0xFF;  // 序号
+                        int sequenceNumber = mm.getSequenceNumber();  // 序号
                         // 只有第一个包的长度是准确的，如果分包会不准确，因此这样处理
                         if (sequenceNumber == 0) {
-                            packetLength = (buffer[0] & 0xFF) | ((buffer[1] & 0xFF) << 8) | ((buffer[2] & 0xFF) << 16); // 数据包的长度
-                            commandByte = buffer[4] & 0xFF;     // 数据包中的命令字节。这个字段不能信任，比如 wordpress 这个字段都是 3（query）
+                            sqlBuilder.setTargetLength(mm.getPackageLength() - 4);  // 数据包的长度
+                            sqlBuilder.setCommandByte(mm.getCommandByte());     // 数据包中的命令字节
                         }
 
-                        if (!sqlQuery.equals("")    // !sqlQuery.equals("") 是客户端会发送 0 长度的包保存连接；
-                                && sqlBuilder.length() >= packetLength - 4  // sqlBuilder.length() >= packetLength - 4：满包，兼容长 sql，数据包分多个的情况
-                        ) {
-                            if (!sqlQuery.contains("mysql_native_password")) { // mysql_native_password 是发送账号密码
-                                SqlLogModel.insertLog(project, sqlQuery);
-                                // 通知页面展示
-                                MyTableView myTableView = MyTableView.getInstance(project);
-                                myTableView.updateData();
-                            }
-
-                            // 重置收集器
-                            sqlBuilder.setLength(0);
+                        String sql = mm.getSql();
+                        if (!sql.equals("")) {  /* !sqlQuery.equals("") 是客户端会发送 0 长度的包保存连接； */
+                            SqlLogModel.insertLog(project, sql);
                         }
                     }
 
@@ -276,6 +263,54 @@ public final class MySQLProxyServerService implements Disposable {
                 byte[] buffer = new byte[4096];
                 int bytesRead;
                 while ((bytesRead = mysqlIn.read(buffer)) != -1) {
+                    int packetLength = (buffer[0] & 0xFF) | ((buffer[1] & 0xFF) << 8) | ((buffer[2] & 0xFF) << 16); // 数据包的长度
+                    int sequenceNumber = buffer[3] & 0xFF;  // 序号
+                    String responseData = new String(Arrays.copyOfRange(buffer, 5, bytesRead));
+
+                    // 数据包中数据的偏移位置
+//                    int dataIndex = 4;
+//                    while (dataIndex < bytesRead) {
+//                        // 解析数据类型
+//                        byte dataType = buffer[dataIndex];
+//                        dataIndex++; // 数据类型字节后移一位
+//
+//                        // 根据数据类型解析值
+//                        switch (dataType) {
+//                            case 0x00: // 数据类型为NULL
+//                                System.out.println("NULL");
+//                                break;
+//
+//                            case 0x01: // 数据类型为整数
+//                                int intValue = (buffer[dataIndex] & 0xFF) |
+//                                        ((buffer[dataIndex + 1] & 0xFF) << 8) |
+//                                        ((buffer[dataIndex + 2] & 0xFF) << 16) |
+//                                        ((buffer[dataIndex + 3] & 0xFF) << 24);
+//                                dataIndex += 4; // 整数占用4个字节
+//                                System.out.println("整数值: " + intValue);
+//                                break;
+//
+//                            case 0x02: // 数据类型为浮点数
+//                                // 解析浮点数的方式根据MySQL协议规范进行
+//                                // ...
+//                                break;
+//
+//                            case 0x08: // 数据类型为字符串
+//                                int stringLength = (buffer[dataIndex] & 0xFF) | ((buffer[dataIndex + 1] & 0xFF) << 8);
+//                                dataIndex += 2; // 字符串长度占用2个字节
+//                                String stringValue = new String(Arrays.copyOfRange(buffer, dataIndex, dataIndex + stringLength));
+//                                dataIndex += stringLength; // 字符串数据长度
+//                                System.out.println("字符串值: " + stringValue);
+//                                break;
+//
+//                            // 其他数据类型的处理
+//                            // ...
+//
+//                            default:
+//                                System.err.println("未知数据类型: " + dataType);
+//                                break;
+//                        }
+//                    }
+
                     clientOut.write(buffer, 0, bytesRead);
                     clientOut.flush();
                 }
