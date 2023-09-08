@@ -56,7 +56,9 @@ public class StmtExecute {
                     // 参数长度
                     int paramLength = packetData[position++];
 
-                    paramsList[i] = "`" + new String(Arrays.copyOfRange(packetData, position, (position += paramLength - 1))) + "`";
+                    paramsList[i] = "`" + new String(Arrays.copyOfRange(packetData, position, (position + paramLength))) + "`";
+                    // 调整指针位置
+                    position += paramLength - 1;
                     break;
             }
 
