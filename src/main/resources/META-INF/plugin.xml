@@ -149,7 +149,7 @@
     <!-- 注册跟随编辑器启动 -->
     <project-components>
         <component>
-            <implementation-class>com.ls.akong.mysql_proxy.ui.MySQLToolWindowListener</implementation-class>
+            <implementation-class>com.ls.akong.mysql_proxy.services.MySQLToolWindowListener</implementation-class>
         </component>
     </project-components>
 </idea-plugin>

@@ -1,10 +1,10 @@
-package com.ls.akong.mysql_proxy.ui;
+package com.ls.akong.mysql_proxy.services;
 
 import com.intellij.openapi.components.ProjectComponent;
+import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
-import com.ls.akong.mysql_proxy.services.MySQLProxyServerService;
-import com.ls.akong.mysql_proxy.services.MysqlProxySettings;
 
+@Service(Service.Level.PROJECT)
 public class MySQLToolWindowListener implements ProjectComponent {
 
     private final Project project;

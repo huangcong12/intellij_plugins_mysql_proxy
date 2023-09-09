@@ -266,53 +266,9 @@ public final class MySQLProxyServerService implements Disposable {
                 byte[] buffer = new byte[4096];
                 int bytesRead;
                 while ((bytesRead = mysqlIn.read(buffer)) != -1) {
-                    int packetLength = (buffer[0] & 0xFF) | ((buffer[1] & 0xFF) << 8) | ((buffer[2] & 0xFF) << 16); // 数据包的长度
-                    int sequenceNumber = buffer[3] & 0xFF;  // 序号
-                    String responseData = new String(Arrays.copyOfRange(buffer, 5, bytesRead));
-
-                    // 数据包中数据的偏移位置
-//                    int dataIndex = 4;
-//                    while (dataIndex < bytesRead) {
-//                        // 解析数据类型
-//                        byte dataType = buffer[dataIndex];
-//                        dataIndex++; // 数据类型字节后移一位
-//
-//                        // 根据数据类型解析值
-//                        switch (dataType) {
-//                            case 0x00: // 数据类型为NULL
-//                                System.out.println("NULL");
-//                                break;
-//
-//                            case 0x01: // 数据类型为整数
-//                                int intValue = (buffer[dataIndex] & 0xFF) |
-//                                        ((buffer[dataIndex + 1] & 0xFF) << 8) |
-//                                        ((buffer[dataIndex + 2] & 0xFF) << 16) |
-//                                        ((buffer[dataIndex + 3] & 0xFF) << 24);
-//                                dataIndex += 4; // 整数占用4个字节
-//                                System.out.println("整数值: " + intValue);
-//                                break;
-//
-//                            case 0x02: // 数据类型为浮点数
-//                                // 解析浮点数的方式根据MySQL协议规范进行
-//                                // ...
-//                                break;
-//
-//                            case 0x08: // 数据类型为字符串
-//                                int stringLength = (buffer[dataIndex] & 0xFF) | ((buffer[dataIndex + 1] & 0xFF) << 8);
-//                                dataIndex += 2; // 字符串长度占用2个字节
-//                                String stringValue = new String(Arrays.copyOfRange(buffer, dataIndex, dataIndex + stringLength));
-//                                dataIndex += stringLength; // 字符串数据长度
-//                                System.out.println("字符串值: " + stringValue);
-//                                break;
-//
-//                            // 其他数据类型的处理
-//                            // ...
-//
-//                            default:
-//                                System.err.println("未知数据类型: " + dataType);
-//                                break;
-//                        }
-//                    }
+//                    int packetLength = (buffer[0] & 0xFF) | ((buffer[1] & 0xFF) << 8) | ((buffer[2] & 0xFF) << 16); // 数据包的长度
+//                    int sequenceNumber = buffer[3] & 0xFF;  // 序号
+//                    String responseData = new String(Arrays.copyOfRange(buffer, 5, bytesRead));
 
                     clientOut.write(buffer, 0, bytesRead);
                     clientOut.flush();
