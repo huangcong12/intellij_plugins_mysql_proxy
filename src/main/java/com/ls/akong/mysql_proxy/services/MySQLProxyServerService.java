@@ -215,20 +215,28 @@ public final class MySQLProxyServerService implements Disposable {
                 while ((bytesRead = clientIn.read(buffer)) != -1) {
                     MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(project);
                     if (recordingSwitch.isMonitorEnabled()) {
-                        byte[] rawBuffer = Arrays.copyOfRange(buffer, 0, bytesRead);
-                        MySQLMessage mm = new MySQLMessage(rawBuffer, sqlBuilder);
+                        // 20230909 发现预处理的包 23、25 合并成一个包发送的情况，因此需要判断是否是合并包发送的，如果是还需分开处理
+                        for (int i = 0; i < bytesRead; ) {
+                            int length = (buffer[i] & 0xFF) | ((buffer[i + 1] & 0xFF) << 8) | ((buffer[i + 2] & 0xFF) << 16);
 
-                        // 获取包头中的信息
-                        int sequenceNumber = mm.getSequenceNumber();  // 序号
-                        // 只有第一个包的长度是准确的，如果分包会不准确，因此这样处理
-                        if (sequenceNumber == 0) {
-                            sqlBuilder.setTargetLength(mm.getPackageLength() - 4);  // 数据包的长度
-                            sqlBuilder.setCommandByte(mm.getCommandByte());     // 数据包中的命令字节
-                        }
+                            byte[] itemRawBuffer = Arrays.copyOfRange(buffer, i, i + length + 4);
+                            MySQLMessage mm = new MySQLMessage(itemRawBuffer, sqlBuilder);
 
-                        String sql = mm.getSql();
-                        if (!sql.equals("")) {  /* !sqlQuery.equals("") 是客户端会发送 0 长度的包保存连接； */
-                            SqlLogModel.insertLog(project, sql);
+                            int sequenceNumber = mm.getSequenceNumber();
+                            if (sequenceNumber == 0) {
+                                sqlBuilder.setTargetLength(mm.getPackageLength() - 4);
+                                sqlBuilder.setCommandByte(mm.getCommandByte());
+                            }
+
+                            String sql = mm.getSql();
+                            if (!sql.equals("")) {
+                                SqlLogModel.insertLog(project, sql);
+                            }
+                            if (i > 0) {
+                                System.out.println("连续的：");
+                            }
+
+                            i += length + 4;
                         }
                     }
 
