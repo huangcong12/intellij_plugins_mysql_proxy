@@ -170,7 +170,7 @@ public final class MyTableView extends JPanel {
                 // 在 EDT 更新表格
                 SwingUtilities.invokeLater(tableModel::fireTableDataChanged);
             }
-        }, 300);
+        }, 100);
     }
 
     // 刷新数据，从第一页开始
