@@ -208,7 +208,9 @@ public final class MySQLProxyServerService implements Disposable {
                 InputStream clientIn = clientSocket.getInputStream();
                 OutputStream mysqlOut = mysqlSocket.getOutputStream();
 
-                byte[] buffer = new byte[4096];
+                // 原来这里是 4096 的，但是 MySQL 的包最大是 16 M，如果我们自己切，难以知道哪个包是最后的，不能确认一条超级长的 SQL 是否完毕
+                // 因此调整成 16 M:16 * 1024 * 1024=16777216
+                byte[] buffer = new byte[16777216];
                 int bytesRead;
                 SqlBuilder sqlBuilder = new SqlBuilder();
 
@@ -231,9 +233,6 @@ public final class MySQLProxyServerService implements Disposable {
                             String sql = mm.getSql();
                             if (!sql.equals("")) {
                                 SqlLogModel.insertLog(project, sql);
-                            }
-                            if (i > 0) {
-                                System.out.println("连续的：");
                             }
 
                             i += length + 4;
