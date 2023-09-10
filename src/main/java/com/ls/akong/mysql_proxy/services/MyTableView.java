@@ -235,7 +235,7 @@ public final class MyTableView extends JPanel {
         /**
          * 加载数据，sql_log 有新增数据的时候，会调用这个方法
          */
-        public int preRefreshData() {
+        public synchronized int preRefreshData() {
             List<SqlLog> newDataList = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, 0, getFirstItemId(), pageSize);
             if (newDataList.isEmpty()) {  // 兼容这些 SQL 已被添加到过滤表的场景
                 return 0;
