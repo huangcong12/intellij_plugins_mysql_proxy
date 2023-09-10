@@ -24,9 +24,7 @@
 
         <p> PHP:</p>
         <ul>
-            <li> Wordpress</li>
-            <li> CodeIgniter (CI)</li>
-            <li> Yii</li>
+            <li> Supports any framework, including: WordPress, Laravel, CI, Yii, ThinkPHP, and custom frameworks.</li>
         </ul>
 
         <p> Go:</p>
@@ -38,14 +36,7 @@
 
         <p> Python:</p>
         <ul>
-            <li> Django</li>
-        </ul>
-
-        <p> Not well-suited for frameworks using SQL preprocessing:</p>
-        <p> PHP (Utilizes PDO for prepared statement execution; complete packet parsing not supported):</p>
-        <ul>
-            <li> Laravel</li>
-            <li> ThinkPHP 6 (tp6)</li>
+            <li> Django (Tested and passed).</li>
         </ul>
 
         <hr/>
@@ -90,14 +81,21 @@
     <change-notes><![CDATA[
     <p>
         <ul>
-          <li><strong>Important Note:</strong> You can report exception-issues directly from your IDE. Please
-          add at least a comment what you have done when it occurred / how you can reproduce it. It would be even better
-          when add an email address so I can contact you in case of questions.</li>
+            <li><strong>Important Note:</strong> You can report exception-issues directly from your IDE. Please add at least a comment what you have done when it occurred / how you can reproduce it. It would be even better when add an email address so I can contact you in case of questions. </li>
 
-          <li> 1.0.2 </li>
-          <ul>
-            <li>adjusting the data type for saving SQL logs.</li>K
-          </ul>
+            <li> 1.0.3 </li>
+            <ul>
+                <li>Added parsing functionality for prepared data packets.</li>
+                <li>Optimized TableView display by showing only the first 500 characters of very long SQL statements to prevent excessive resource consumption.</li>
+                <li>Fixed a bug related to incorrect handling of combined MySQL data packet sending.</li>
+                <li>Fixed a bug where the plugin didn't start correctly with the editor.</li>
+                <li>Fixed bugs related to duplicate or missing data in the TableView.</li>
+            </ul>
+            <li> 1.0.2 </li>
+            <ul>
+                <li>adjusting the data type for saving SQL logs.</li>
+            </ul>
+        </ul>
     </p>
 ]]></change-notes>
 
