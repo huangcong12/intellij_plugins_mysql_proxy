@@ -6,6 +6,8 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
+import com.ls.akong.mysql_proxy.util.MySQLMessage;
+import com.ls.akong.mysql_proxy.util.SqlBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,10 +75,7 @@ public final class MySQLProxyServerService implements Disposable {
             try (ServerSocket ignored = new ServerSocket(port)) {
                 // If binding succeeds, the port is available
             } catch (BindException bindException) {     // 端口占用
-                String errorMessage = "Run Failed, Error Message:\n" + bindException.getMessage() + "\n\n" +
-                        "Possible Reasons for the Failure:\n" +
-                        "1. Port " + port + " already in use. Please modify to a different port and retry.\n" +
-                        "2. Insufficient port binding permissions. If you're using a Linux-based system, consider using a port between 1024 and 65535.";
+                String errorMessage = "Run Failed, Error Message:\n" + bindException.getMessage() + "\n\n" + "Possible Reasons for the Failure:\n" + "1. Port " + port + " already in use. Please modify to a different port and retry.\n" + "2. Insufficient port binding permissions. If you're using a Linux-based system, consider using a port between 1024 and 65535.";
                 String errorTitle = "Proxy Listener Port Conflict Error";
                 logger.error(bindException.getMessage(), bindException);
                 Messages.showErrorDialog(errorMessage, errorTitle);
@@ -160,6 +159,9 @@ public final class MySQLProxyServerService implements Disposable {
     public void addListener(MysqlProxyServiceStateListener listener) {
         if (!listeners.contains(listener)) {
             listeners.add(listener);
+
+            // 马上通知一遍，因为跟随编辑器启动的逻辑运行比较早，那时候还没有订阅，因此需要马上通知一遍，更改图标
+            notifyListeners();
         }
     }
 
@@ -206,41 +208,39 @@ public final class MySQLProxyServerService implements Disposable {
                 InputStream clientIn = clientSocket.getInputStream();
                 OutputStream mysqlOut = mysqlSocket.getOutputStream();
 
-                byte[] buffer = new byte[4096];
+                // 原来这里是 4096 的，但是 MySQL 的包最大是 16 M，如果我们自己切，难以知道哪个包是最后的，不能确认一条超级长的 SQL 是否完毕
+                // 因此调整成 16 M:16 * 1024 * 1024=16777216
+                byte[] buffer = new byte[16777216];
                 int bytesRead;
-                int packetLength = 0;
-                int commandByte = 0;
-                StringBuilder sqlBuilder = new StringBuilder(); // 用于存储SQL语句
+                SqlBuilder sqlBuilder = new SqlBuilder();
 
                 while ((bytesRead = clientIn.read(buffer)) != -1) {
-                    // 将接收到的数据转换为字符串
-                    String requestData = new String(Arrays.copyOfRange(buffer, 4, bytesRead));
-                    sqlBuilder.append(requestData);
-                    String sqlQuery = sqlBuilder.toString().trim();
-                    // 去掉换行符、多个空格只保留一个
-                    sqlQuery = sqlQuery.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll(" +", " ");
+                    MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(project);
+                    if (recordingSwitch.isMonitorEnabled()) {
+                        // 20230909 发现预处理的包 23、25 合并成一个包发送的情况，因此需要判断是否是合并包发送的，如果是还需分开处理
+                        for (int i = 0; i < bytesRead; ) {
+                            int length = (buffer[i] & 0xFF) | ((buffer[i + 1] & 0xFF) << 8) | ((buffer[i + 2] & 0xFF) << 16);
 
-                    // 获取包头中的信息
-                    int sequenceNumber = buffer[3] & 0xFF;  // 序号
-                    // 只有第一个包的长度是准确的，如果分包会不准确，因此这样处理
-                    if (sequenceNumber == 0) {
-                        packetLength = (buffer[0] & 0xFF) | ((buffer[1] & 0xFF) << 8) | ((buffer[2] & 0xFF) << 16); // 数据包的长度
-                        commandByte = buffer[4] & 0xFF;     // 数据包中的命令字节
-                    }
+                            byte[] itemRawBuffer = Arrays.copyOfRange(buffer, i, i + length + 4);
+                            MySQLMessage mm = new MySQLMessage(itemRawBuffer, sqlBuilder);
 
-                    // !sqlQuery.equals("") 是客户端会发送 0 长度的包保存连接；sqlBuilder.length() >= packetLength - 4：满包，兼容长 sql，数据包分多个的情况
-                    if (!sqlQuery.equals("") && sqlBuilder.length() >= packetLength - 4) {
-                        // 只记录 Query 的到表里
-                        MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(project);
-                        if (recordingSwitch.isMonitorEnabled() && commandByte == 0x03) {
-                            SqlLogModel.insertLog(project, sqlQuery);
-                            // 通知页面展示
-                            MyTableView myTableView = MyTableView.getInstance(project);
-                            myTableView.updateData();
+                            int sequenceNumber = mm.getSequenceNumber();
+                            if (sequenceNumber == 0) {
+                                sqlBuilder.setTargetLength(mm.getPackageLength() - 4);
+                                sqlBuilder.setCommandByte(mm.getCommandByte());
+                            }
+
+                            String sql = mm.getSql();
+                            if (!sql.equals("")) {
+                                SqlLogModel.insertLog(project, sql);
+
+                                // Notify the UI to update for the specified project
+                                MyTableView myTableView = MyTableView.getInstance(project);
+                                myTableView.updateData();
+                            }
+
+                            i += length + 4;
                         }
-
-                        // 重置收集器
-                        sqlBuilder.setLength(0);
                     }
 
                     // 准发给 mysql service
@@ -277,6 +277,10 @@ public final class MySQLProxyServerService implements Disposable {
                 byte[] buffer = new byte[4096];
                 int bytesRead;
                 while ((bytesRead = mysqlIn.read(buffer)) != -1) {
+//                    int packetLength = (buffer[0] & 0xFF) | ((buffer[1] & 0xFF) << 8) | ((buffer[2] & 0xFF) << 16); // 数据包的长度
+//                    int sequenceNumber = buffer[3] & 0xFF;  // 序号
+//                    String responseData = new String(Arrays.copyOfRange(buffer, 5, bytesRead));
+
                     clientOut.write(buffer, 0, bytesRead);
                     clientOut.flush();
                 }

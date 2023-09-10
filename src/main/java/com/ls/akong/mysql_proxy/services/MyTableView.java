@@ -8,7 +8,6 @@ import com.intellij.ui.table.JBTable;
 import com.ls.akong.mysql_proxy.entity.SqlLog;
 import com.ls.akong.mysql_proxy.model.SqlLogFilterModel;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
-import icons.CollaborationToolsIcons;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -39,18 +38,18 @@ public final class MyTableView extends JPanel {
         // 增加右键菜单
         JPopupMenu popupMenu = new JPopupMenu();
         // 复制
-        JMenuItem copyItem = new JMenuItem("Copy", AllIcons.Actions.Copy);
+        JMenuItem copyItem = new JMenuItem("Copy Sql", AllIcons.Actions.Copy);
         copyItem.addActionListener(e -> {
             // 复制当前选中的单元格的数据
             int row = table.getSelectedRow();
-            int col = table.getSelectedColumn();
-            Object value = table.getValueAt(row, col);
-            StringSelection stringSelection = new StringSelection(value.toString());
+            Object id = table.getValueAt(row, 0);
+
+            StringSelection stringSelection = new StringSelection(tableModel.getSqlById((Integer) id));
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(stringSelection, null);
         });
         // 删除
-        JMenuItem deleteItem = new JMenuItem("Delete", CollaborationToolsIcons.DeleteHovered);
+        JMenuItem deleteItem = new JMenuItem("Delete", AllIcons.Actions.DeleteTagHover);
         deleteItem.addActionListener(e -> {
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
@@ -59,7 +58,7 @@ public final class MyTableView extends JPanel {
                 SqlLogModel.deleteDataById(project, (Integer) id);
 
                 // 删除展示的 table View 数据
-                tableModel.removeDataById((Integer) id);
+                tableModel.removeDataByRowId(selectedRow);
                 // 重新加载
                 SwingUtilities.invokeLater(tableModel::fireTableDataChanged);
             }
@@ -70,12 +69,12 @@ public final class MyTableView extends JPanel {
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
                 Object id = table.getModel().getValueAt(selectedRow, 0); // 假设 id 是表的第一列
-                Object sql = table.getModel().getValueAt(selectedRow, 1);
+
                 // 调用数据库进行删除
-                SqlLogFilterModel.insertLogFilter(project, (String) sql);
+                SqlLogFilterModel.insertLogFilter(project, tableModel.getSqlById((Integer) id));
 
                 // 删除展示的 table View 数据
-                tableModel.removeDataById((Integer) id);
+                tableModel.removeDataByRowId(selectedRow);
                 // 重新加载
                 SwingUtilities.invokeLater(tableModel::fireTableDataChanged);
             }
@@ -90,6 +89,9 @@ public final class MyTableView extends JPanel {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     // 只设置选择，不显示菜单
                     int row = table.rowAtPoint(e.getPoint());
+                    if (row < 0) {
+                        return;
+                    }
                     int col = table.columnAtPoint(e.getPoint());
                     table.setRowSelectionInterval(row, row);
                     table.setColumnSelectionInterval(col, col);
@@ -100,6 +102,9 @@ public final class MyTableView extends JPanel {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     // 显示菜单
                     int row = table.rowAtPoint(e.getPoint());
+                    if (row < 0) {
+                        return;
+                    }
                     int col = table.columnAtPoint(e.getPoint());
                     table.setRowSelectionInterval(row, row);
                     table.setColumnSelectionInterval(col, col);
@@ -165,7 +170,7 @@ public final class MyTableView extends JPanel {
                 // 在 EDT 更新表格
                 SwingUtilities.invokeLater(tableModel::fireTableDataChanged);
             }
-        }, 300);
+        }, 100);
     }
 
     // 刷新数据，从第一页开始
@@ -192,6 +197,10 @@ public final class MyTableView extends JPanel {
         }
 
         private int getFirstItemId() {
+            if (data.size() == 0) {
+                return 0;
+            }
+
             try {
                 return data.get(0).getId();
             } catch (IndexOutOfBoundsException e) {
@@ -210,7 +219,7 @@ public final class MyTableView extends JPanel {
         /**
          * 加载数据，首次启动会调用这个方法
          */
-        public void refreshData() {
+        public synchronized void refreshData() {
             data = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, 0, 0, pageSize);
         }
 
@@ -220,6 +229,10 @@ public final class MyTableView extends JPanel {
          * @return integer
          */
         private int getLastItemId() {
+            if (data.size() == 0) {
+                return 0;
+            }
+
             try {
                 return data.get(data.size() - 1).getId();
             } catch (IndexOutOfBoundsException e) {
@@ -230,7 +243,7 @@ public final class MyTableView extends JPanel {
         /**
          * 加载数据，sql_log 有新增数据的时候，会调用这个方法
          */
-        public int preRefreshData() {
+        public synchronized int preRefreshData() {
             List<SqlLog> newDataList = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, 0, getFirstItemId(), pageSize);
             if (newDataList.isEmpty()) {  // 兼容这些 SQL 已被添加到过滤表的场景
                 return 0;
@@ -262,16 +275,27 @@ public final class MyTableView extends JPanel {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            SqlLog item = data.get(rowIndex);
-            switch (columnIndex) {
-                case 0:
-                    return item.getId();
-                case 1:
-                    return item.getSql();
-                case 2:
-                    return item.getCreatedAt();
-                default:
-                    return null;
+            try {
+                SqlLog item = data.get(rowIndex);
+                switch (columnIndex) {
+                    case 0:
+                        return item.getId();
+                    case 1:
+                        String sql = item.getSql();
+                        if (sql.length() > 1000) {
+                            // 截取前1000个字符并添加三个点
+                            return sql.substring(0, 500) + "...(Right-click and select 'Copy SQL' to copy everything.)";
+                        } else {
+                            return sql;
+                        }
+
+                    case 2:
+                        return item.getCreatedAt();
+                    default:
+                        return null;
+                }
+            } catch (IndexOutOfBoundsException e) {
+                return null;
             }
         }
 
@@ -284,8 +308,16 @@ public final class MyTableView extends JPanel {
         /**
          * 下一页
          */
-        public void nextPage() {
-            List<SqlLog> list = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, getLastItemId(), 0, pageSize);
+        public synchronized void nextPage() {
+            int lastItemId = getLastItemId();
+            if (lastItemId == 0) {  // 也不清楚为什么会走到这里，但是确实是有进来的
+                return;
+            }
+
+            List<SqlLog> list = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, lastItemId, 0, pageSize);
+            if (list.size() == 0) {
+                return;
+            }
 
             // 时间段搜索的话，不分页
             if (!Objects.equals(selectedTimeRange, "No Limit")) {
@@ -297,13 +329,18 @@ public final class MyTableView extends JPanel {
             data.addAll(list);
         }
 
-        public void removeDataById(int id) {
-            for (int i = 0; i < data.size(); i++) {
-                if (data.get(i).getId() == id) {
-                    data.remove(i);
-                    break;
-                }
-            }
+        public void removeDataByRowId(int rowId) {
+            data.remove(rowId);
+        }
+
+        public String getSqlById(int id) {
+            SqlLog sqlLog = SqlLogModel.getById(project, id);
+            assert sqlLog != null;
+            return sqlLog.getSql();
+        }
+
+        public List<SqlLog> data() {
+            return data;
         }
     }
 }

@@ -4,63 +4,74 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.ls.akong.mysql_proxy.entity.SqlLog;
 import com.ls.akong.mysql_proxy.services.DatabaseManagerService;
+import com.ls.akong.mysql_proxy.services.MyTableView;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class SqlLogModel {
     private static final Logger logger = Logger.getInstance(SqlLogModel.class);
-    private static Timer debounceTimer = new Timer();
+    private static final int INSERT_INTERVAL_MS = 100;
 
-    private static final List<String> newLog = new ArrayList<>();
+    private static Map<String, BlockingQueue<String>> projectLogQueues = new HashMap<>();
+    private static Map<String, Thread> logInsertThreads = new HashMap<>();
 
     public static void insertLog(Project project, String sql) {
-        newLog.add(sql);
+        // Get the project name
+        String projectName = project.getName();
 
-        // 取消之前的定时任务
-        debounceTimer.cancel();
+        // Check if a queue for this project already exists
+        BlockingQueue<String> logQueue = projectLogQueues.get(projectName);
 
-        // 创建一个新的定时任务，在100ms后执行通知操作
-        debounceTimer = new Timer();
-        debounceTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                List<String> newLogCopy = new ArrayList<>(newLog);
-                newLog.clear();
+        if (logQueue == null) {
+            // Create a new queue for this project
+            logQueue = new LinkedBlockingQueue<>();
+            projectLogQueues.put(projectName, logQueue);
 
-                String insertSQL = "INSERT INTO sql_log (sql, created_at) VALUES (?, ?)";
-
-                DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
-                try {
-                    PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(insertSQL);
-                    for (String sql : newLogCopy) {
-                        preparedStatement.setString(1, sql);
-                        preparedStatement.setDouble(2, System.currentTimeMillis());
-                        preparedStatement.addBatch();
+            // Start a new thread for this project
+            BlockingQueue<String> finalLogQueue = logQueue;
+            Thread logInsertThread = new Thread(() -> {
+                while (true) {
+                    try {
+                        // Get the log message from the queue and insert it into the database
+                        String logMessage = finalLogQueue.poll(INSERT_INTERVAL_MS, TimeUnit.MILLISECONDS);
+                        if (logMessage != null) {
+                            insertLogIntoDatabase(project, logMessage);
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                    preparedStatement.executeBatch();
-                } catch (SQLException e) {
-                    e.printStackTrace();
                 }
-            }
-        }, 100); // 在100ms后执行
+            });
+            logInsertThread.start();
+
+            // Store the thread in the map for future use
+            logInsertThreads.put(projectName, logInsertThread);
+        }
+
+        // Add the log message to the project's queue
+        logQueue.offer(sql);
     }
 
-//    public void updateLog(int id, String newStatus, int newSpendTime) {
-//        String updateSQL = "UPDATE sql_log SET status = ?, spend_time = ? WHERE id = ?";
-//
-//        try (PreparedStatement preparedStatement = DatabaseManager.getConnection().prepareStatement(updateSQL)) {
-//            preparedStatement.setString(1, newStatus);
-//            preparedStatement.setInt(2, newSpendTime);
-//            preparedStatement.setInt(3, id);
-//            preparedStatement.executeUpdate();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    private static void insertLogIntoDatabase(Project project, String sql) {
+        String insertSQL = "INSERT INTO sql_log (sql, created_at) VALUES (?, ?)";
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+
+        try {
+            PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(insertSQL);
+            preparedStatement.setString(1, sql);
+            preparedStatement.setLong(2, System.currentTimeMillis());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static List<SqlLog> queryLogs(Project project, String searchText, String selectedTimeRange, int maxLimitId, int minLimitId, int pageSize) {
         List<SqlLog> logEntries = new ArrayList<>();
@@ -104,18 +115,17 @@ public class SqlLogModel {
             }
         }
 
-        querySQL += " AND sql NOT IN (SELECT sql FROM sql_log_filter)";
+        querySQL += " AND sql NOT IN (SELECT sql FROM sql_log_filter) ORDER BY id DESC";
 
-        querySQL += " ORDER BY id DESC";
-
-        // 不是前增、时间搜索的，才用分页
-        if (maxLimitId > 0 || selectedTimeRange.equals("No Limit")) {
+        // 非前增、时间搜索的，才用分页
+        if (minLimitId == 0 && selectedTimeRange.equals("No Limit")) {
             querySQL += " LIMIT 0," + pageSize;
         }
         logger.info("sql: " + querySQL);
 
-        DatabaseManagerService databaseManger = project.getService(DatabaseManagerService.class);
-        try (Statement statement = databaseManger.getConnection().createStatement(); ResultSet resultSet = statement.executeQuery(querySQL)) {
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(querySQL);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String sql = resultSet.getString("sql");
@@ -129,16 +139,11 @@ public class SqlLogModel {
         return logEntries;
     }
 
-    public static SqlLog getById(Project project, int id, String searchText) {
-        String insertSQL = "SELECT * FROM sql_log WHERE id=? ";
-        if (!Objects.equals(searchText, "")) {
-            insertSQL += " AND sql LIKE '%" + searchText + "%'";
-        }
-        insertSQL += "AND sql NOT IN (SELECT sql FROM sql_log_filter)";
-        logger.info("getById sql: " + insertSQL);
+    public static SqlLog getById(Project project, int id) {
+        String querySQL = "SELECT * FROM sql_log WHERE id=? ";
 
-        DatabaseManagerService databaseManger = project.getService(DatabaseManagerService.class);
-        try (PreparedStatement preparedStatement = databaseManger.getConnection().prepareStatement(insertSQL)) {
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(querySQL)) {
             preparedStatement.setInt(1, id);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -159,10 +164,10 @@ public class SqlLogModel {
 
     // 重置 sql log 表，并且 id 从 1 开始
     public static void truncateSqlLog(Project project) {
-        String truncateSQL = "DELETE FROM sql_log;UPDATE sqlite_sequence SET seq = 0 WHERE name = 'sql_log'";
+        String truncateSQL = "TRUNCATE TABLE sql_log RESTART IDENTITY";
 
-        DatabaseManagerService databaseManger = project.getService(DatabaseManagerService.class);
-        try (Statement statement = databaseManger.getConnection().createStatement()) {
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+        try (Statement statement = databaseManager.getConnection().createStatement()) {
             statement.executeUpdate(truncateSQL);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -173,14 +178,14 @@ public class SqlLogModel {
      * 建表 SQL
      */
     public static String getCreateTableSql() {
-        return "CREATE TABLE IF NOT EXISTS sql_log (id INTEGER PRIMARY KEY AUTOINCREMENT,sql TEXT,created_at REAL)";
+        return "CREATE TABLE IF NOT EXISTS sql_log (id INT AUTO_INCREMENT PRIMARY KEY, sql CLOB, created_at BIGINT)";
     }
 
     public static void deleteDataById(Project project, int id) {
         String sql = "DELETE FROM sql_log WHERE id = ?";
 
-        DatabaseManagerService databaseManger = project.getService(DatabaseManagerService.class);
-        try (PreparedStatement preparedStatement = databaseManger.getConnection().prepareStatement(sql)) {
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(sql)) {
             preparedStatement.setInt(1, id);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {

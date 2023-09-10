@@ -2,9 +2,9 @@
 
  <g>
   <title>Layer 1</title>
-  <path style="--darkreader-inline-fill: #444a4d;" id="svg_1" fill="#AFB1B3" d="m4.63799,0.5409l-2.05553,1.07081l-1.71453,0.86867l-0.8409,0.43141l5.01356,1.28422l5.87152,-2.77433l-2.92916,0l1.24578,-0.96222l-4.59073,0.08144zm3.98488,2.49001l-3.00173,1.39418c7.88367,3.69792 -3.6893,8.00035 -2.97329,8.00035l3.12076,0.05429c0.71599,0 4.1671,-1.3083 4.1671,-1.9119l1.25347,-4.36461l-2.56632,-3.17231z" clip-rule="evenodd" fill-rule="evenodd"/>
-  <ellipse style="--darkreader-inline-fill: #444a4d;" ry="1.99324" rx="1.90878" id="svg_2" cy="7.2" cx="4.63852" fill="#AFB1B3"/>
-  <ellipse style="--darkreader-inline-fill: #444a4d;" ry="0.77702" rx="0.59122" id="svg_3" cy="7.02366" cx="8.18581" fill="#AFB1B3"/>
+  <path style="--darkreader-inline-fill: #444a4d;" id="svg_1" fill="#6E6E6E" d="m4.63799,0.5409l-2.05553,1.07081l-1.71453,0.86867l-0.8409,0.43141l5.01356,1.28422l5.87152,-2.77433l-2.92916,0l1.24578,-0.96222l-4.59073,0.08144zm3.98488,2.49001l-3.00173,1.39418c7.88367,3.69792 -3.6893,8.00035 -2.97329,8.00035l3.12076,0.05429c0.71599,0 4.1671,-1.3083 4.1671,-1.9119l1.25347,-4.36461l-2.56632,-3.17231z" clip-rule="evenodd" fill-rule="evenodd"/>
+  <ellipse style="--darkreader-inline-fill: #444a4d;" ry="1.99324" rx="1.90878" id="svg_2" cy="7.2" cx="4.63852" fill="#6E6E6E"/>
+  <ellipse style="--darkreader-inline-fill: #444a4d;" ry="0.77702" rx="0.59122" id="svg_3" cy="7.02366" cx="8.18581" fill="#6E6E6E"/>
   <circle cx="11" cy="11" r="2" fill="#00ff00"/>
  </g>
 </svg>

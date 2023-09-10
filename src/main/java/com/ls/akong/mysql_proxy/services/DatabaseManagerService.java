@@ -1,67 +1,55 @@
 package com.ls.akong.mysql_proxy.services;
 
-import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.ls.akong.mysql_proxy.model.SqlLogFilterModel;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 @Service(Service.Level.PROJECT)
-public final class DatabaseManagerService implements Disposable {
+public final class DatabaseManagerService {
     private static final Logger logger = Logger.getInstance(DatabaseManagerService.class);
 
     private Connection connection;
 
     public DatabaseManagerService(@NotNull Project project) {
-
         try {
-            // TODO 开发过程中，换成非插件的目录
-//            String pluginDataDirPath = PathManager.getPluginsPath() + File.separator + "sql_proxy";
-            String pluginDataDirPath = "sql_proxy" + File.separator + project.getName() + File.separator;
+            String pluginDataDirPath = PathManager.getPluginsPath() + File.separator + "sql_proxy" + File.separator + project.getName() + File.separator;
             File pluginDataDir = new File(pluginDataDirPath);
             if (!pluginDataDir.exists()) {
-                logger.info("create sqlite dir: " + pluginDataDirPath);
+                logger.info("create H2 database dir: " + pluginDataDirPath);
                 if (!pluginDataDir.mkdirs()) {
                     logger.error("Failed to create folder: " + pluginDataDirPath);
                     Messages.showErrorDialog("Failed to create folder: " + pluginDataDirPath, "Error Creating");
                 }
             }
 
-            String dbFilePath = pluginDataDirPath + File.separator + "database.db";
-            logger.info("db file: " + dbFilePath);
+            String dbFilePath = pluginDataDirPath + "h2database";
+            logger.info("H2 database file: " + dbFilePath);
 
-            // 加载 SQLite 驱动
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + dbFilePath);
-            createTableIfNotExists();   // 创建表（如果不存在）
-        } catch (ClassNotFoundException | SQLException e) {
+            // 创建H2数据库的内置连接池
+            JdbcConnectionPool connectionPool = JdbcConnectionPool.create("jdbc:h2:" + dbFilePath, "", "");
+
+            // 从连接池获取连接
+            connection = connectionPool.getConnection();
+            createTableIfNotExists(); // 创建表（如果不存在）
+        } catch (SQLException e) {
+            logger.error("H2 database initialization fail " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     public Connection getConnection() {
         return connection;
-    }
-
-    public void close() {
-        try {
-            if (connection != null) {
-                connection.close();
-                logger.info("close sqlite connection success");
-            }
-        } catch (SQLException e) {
-            logger.error("close sqlite connection fail " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 
     // 首次执行的时候，如果不存在表，则创建表
@@ -72,19 +60,10 @@ public final class DatabaseManagerService implements Disposable {
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(createSqlLogTable);
             statement.executeUpdate(createSqlLogFilterTable);
-            logger.info("exec create table sql success");
+            logger.info("exec create table SQL success");
         } catch (SQLException e) {
-            logger.error("exec create table sql fail " + e.getMessage());
+            logger.error("exec create table SQL fail " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    /**
-     * shutdown hook 关闭数据库连接
-     */
-    @Override
-    public void dispose() {
-        logger.info("closing sqlite connection");
-        close();
     }
 }
