@@ -41,9 +41,9 @@ public class MySQLMessage {
             sqlBuilder.append(new String(newBuffer));
 
             // 满包才返回 sql，因为需要兼容长 sql，一条 sql 分多个包发送的情况
-            if (!sqlBuilder.isCollectionComplete()) {
-                return "";
-            }
+//            if (!sqlBuilder.isCollectionComplete()) {
+//                return "";
+//            }
 
             // 预处理包不返回 sql，等待 COM_STMT_EXECUTE 才返回
             if (getCommandByte() == MySQLCommandByte.COM_STMT_PREPARE || getCommandByte() == MySQLCommandByte.COM_STMT_CLOSE) {
