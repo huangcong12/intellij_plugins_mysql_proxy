@@ -43,10 +43,6 @@ public class SqlLogModel {
                         String logMessage = finalLogQueue.poll(INSERT_INTERVAL_MS, TimeUnit.MILLISECONDS);
                         if (logMessage != null) {
                             insertLogIntoDatabase(project, logMessage);
-
-                            // Notify the UI to update for the specified project
-                            MyTableView myTableView = MyTableView.getInstance(project);
-                            myTableView.updateData();
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();

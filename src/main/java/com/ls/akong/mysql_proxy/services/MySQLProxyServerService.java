@@ -233,6 +233,10 @@ public final class MySQLProxyServerService implements Disposable {
                             String sql = mm.getSql();
                             if (!sql.equals("")) {
                                 SqlLogModel.insertLog(project, sql);
+
+                                // Notify the UI to update for the specified project
+                                MyTableView myTableView = MyTableView.getInstance(project);
+                                myTableView.updateData();
                             }
 
                             i += length + 4;
