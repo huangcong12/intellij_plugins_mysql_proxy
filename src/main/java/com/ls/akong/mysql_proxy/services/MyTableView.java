@@ -197,6 +197,10 @@ public final class MyTableView extends JPanel {
         }
 
         private int getFirstItemId() {
+            if (data.size() == 0) {
+                return 0;
+            }
+
             try {
                 return data.get(0).getId();
             } catch (IndexOutOfBoundsException e) {
@@ -215,7 +219,7 @@ public final class MyTableView extends JPanel {
         /**
          * 加载数据，首次启动会调用这个方法
          */
-        public void refreshData() {
+        public synchronized void refreshData() {
             data = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, 0, 0, pageSize);
         }
 
@@ -225,6 +229,10 @@ public final class MyTableView extends JPanel {
          * @return integer
          */
         private int getLastItemId() {
+            if (data.size() == 0) {
+                return 0;
+            }
+
             try {
                 return data.get(data.size() - 1).getId();
             } catch (IndexOutOfBoundsException e) {
@@ -267,16 +275,20 @@ public final class MyTableView extends JPanel {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            SqlLog item = data.get(rowIndex);
-            switch (columnIndex) {
-                case 0:
-                    return item.getId();
-                case 1:
-                    return item.getSql();
-                case 2:
-                    return item.getCreatedAt();
-                default:
-                    return null;
+            try {
+                SqlLog item = data.get(rowIndex);
+                switch (columnIndex) {
+                    case 0:
+                        return item.getId();
+                    case 1:
+                        return item.getSql();
+                    case 2:
+                        return item.getCreatedAt();
+                    default:
+                        return null;
+                }
+            } catch (IndexOutOfBoundsException e) {
+                return null;
             }
         }
 
@@ -289,8 +301,16 @@ public final class MyTableView extends JPanel {
         /**
          * 下一页
          */
-        public void nextPage() {
-            List<SqlLog> list = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, getLastItemId(), 0, pageSize);
+        public synchronized void nextPage() {
+            int lastItemId = getLastItemId();
+            if (lastItemId == 0) {  // 也不清楚为什么会走到这里，但是确实是有进来的
+                return;
+            }
+
+            List<SqlLog> list = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, lastItemId, 0, pageSize);
+            if (list.size() == 0) {
+                return;
+            }
 
             // 时间段搜索的话，不分页
             if (!Objects.equals(selectedTimeRange, "No Limit")) {
