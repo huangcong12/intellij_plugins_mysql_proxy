@@ -1,10 +1,10 @@
 package com.ls.akong.mysql_proxy.ui.action;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.IconLoader;
 import com.ls.akong.mysql_proxy.services.MySQLProxyServerService;
 import com.ls.akong.mysql_proxy.services.MysqlProxyServiceStateListener;
 import org.jetbrains.annotations.NotNull;
@@ -60,10 +60,12 @@ public class RunOrStopServerAction extends AnAction implements MysqlProxyService
         SwingUtilities.invokeLater(() -> {
             // 在此处执行与界面相关的操作
             if (isRunning) {
-                anActionEvent.getPresentation().setIcon(AllIcons.Actions.Suspend);  // 运行中，展示停止图标
+                Icon supendIcon = IconLoader.getIcon("/icons/supend.svg", RunOrStopServerAction.class);
+                anActionEvent.getPresentation().setIcon(supendIcon);  // 运行中，展示停止图标
                 anActionEvent.getPresentation().setText("Stop 'Mysql Proxy Server'");
             } else {
-                anActionEvent.getPresentation().setIcon(AllIcons.Debugger.ThreadRunning); // 停止中，展示启动图标
+                Icon threadRunningIcon = IconLoader.getIcon("/icons/threadRunning.svg", RunOrStopServerAction.class);
+                anActionEvent.getPresentation().setIcon(threadRunningIcon); // 停止中，展示启动图标
                 anActionEvent.getPresentation().setText("Start 'Mysql Proxy Server'");
             }
         });
