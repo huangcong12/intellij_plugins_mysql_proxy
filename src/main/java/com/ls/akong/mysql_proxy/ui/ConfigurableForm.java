@@ -51,6 +51,10 @@ public class ConfigurableForm {
             FilterSqlDialog dialog = new FilterSqlDialog(project);
             if (dialog.showAndGet()) {
                 String sql = dialog.getSqlText();
+                if (sql.isEmpty()) {
+                    Messages.showErrorDialog("Please enter the correct SQL.", "Data Is Incorrect");
+                    return;
+                }
                 SqlLogFilterModel.insertLogFilter(project, sql);
 
                 // 重新加载数据
