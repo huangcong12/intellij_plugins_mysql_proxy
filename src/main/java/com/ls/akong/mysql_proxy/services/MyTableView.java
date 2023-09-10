@@ -42,14 +42,14 @@ public final class MyTableView extends JPanel {
         copyItem.addActionListener(e -> {
             // 复制当前选中的单元格的数据
             int row = table.getSelectedRow();
-            int col = table.getSelectedColumn();
-            Object value = table.getValueAt(row, col);
-            StringSelection stringSelection = new StringSelection(value.toString());
+            Object id = table.getValueAt(row, 0);
+
+            StringSelection stringSelection = new StringSelection(tableModel.getSqlById((Integer) id));
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(stringSelection, null);
         });
         // 删除
-        JMenuItem deleteItem = new JMenuItem("Delete", AllIcons.Actions.DeleteTag);
+        JMenuItem deleteItem = new JMenuItem("Delete", AllIcons.Actions.DeleteTagHover);
         deleteItem.addActionListener(e -> {
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
@@ -58,7 +58,7 @@ public final class MyTableView extends JPanel {
                 SqlLogModel.deleteDataById(project, (Integer) id);
 
                 // 删除展示的 table View 数据
-                tableModel.removeDataById((Integer) id);
+                tableModel.removeDataByRowId(selectedRow);
                 // 重新加载
                 SwingUtilities.invokeLater(tableModel::fireTableDataChanged);
             }
@@ -69,12 +69,12 @@ public final class MyTableView extends JPanel {
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
                 Object id = table.getModel().getValueAt(selectedRow, 0); // 假设 id 是表的第一列
-                Object sql = table.getModel().getValueAt(selectedRow, 1);
+
                 // 调用数据库进行删除
-                SqlLogFilterModel.insertLogFilter(project, (String) sql);
+                SqlLogFilterModel.insertLogFilter(project, tableModel.getSqlById((Integer) id));
 
                 // 删除展示的 table View 数据
-                tableModel.removeDataById((Integer) id);
+                tableModel.removeDataByRowId(selectedRow);
                 // 重新加载
                 SwingUtilities.invokeLater(tableModel::fireTableDataChanged);
             }
@@ -281,7 +281,14 @@ public final class MyTableView extends JPanel {
                     case 0:
                         return item.getId();
                     case 1:
-                        return item.getSql();
+                        String sql = item.getSql();
+                        if (sql.length() > 1000) {
+                            // 截取前1000个字符并添加三个点
+                            return sql.substring(0, 500) + "...(Right-click and select 'Copy SQL' to copy everything.)";
+                        } else {
+                            return sql;
+                        }
+
                     case 2:
                         return item.getCreatedAt();
                     default:
@@ -322,13 +329,14 @@ public final class MyTableView extends JPanel {
             data.addAll(list);
         }
 
-        public void removeDataById(int id) {
-            for (int i = 0; i < data.size(); i++) {
-                if (data.get(i).getId() == id) {
-                    data.remove(i);
-                    break;
-                }
-            }
+        public void removeDataByRowId(int rowId) {
+            data.remove(rowId);
+        }
+
+        public String getSqlById(int id) {
+            SqlLog sqlLog = SqlLogModel.getById(project, id);
+            assert sqlLog != null;
+            return sqlLog.getSql();
         }
 
         public List<SqlLog> data() {

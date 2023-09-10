@@ -139,15 +139,11 @@ public class SqlLogModel {
         return logEntries;
     }
 
-    public static SqlLog getById(Project project, int id, String searchText) {
-        String insertSQL = "SELECT * FROM sql_log WHERE id=? ";
-        if (!Objects.equals(searchText, "")) {
-            insertSQL += " AND sql LIKE '%" + searchText + "%'";
-        }
-        logger.info("getById sql: " + insertSQL);
+    public static SqlLog getById(Project project, int id) {
+        String querySQL = "SELECT * FROM sql_log WHERE id=? ";
 
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
-        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(insertSQL)) {
+        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(querySQL)) {
             preparedStatement.setInt(1, id);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
