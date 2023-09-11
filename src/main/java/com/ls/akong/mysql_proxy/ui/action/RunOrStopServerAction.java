@@ -6,7 +6,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.ls.akong.mysql_proxy.services.MySQLProxyServerService;
-import com.ls.akong.mysql_proxy.services.MysqlProxyServiceStateListener;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -14,17 +13,14 @@ import javax.swing.*;
 /**
  * 运行、停止 sql proxy 服务
  */
-public class RunOrStopServerAction extends AnAction implements MysqlProxyServiceStateListener {
+public class RunOrStopServerAction extends AnAction {
     private static final Logger logger = Logger.getInstance(RunOrStopServerAction.class);
-
     private Project project;
-
-    private AnActionEvent anActionEvent;
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         project = e.getProject();
-        anActionEvent = e;
+
         if (project == null) {
             logger.error("get project failed,return null");
             return;
@@ -33,15 +29,16 @@ public class RunOrStopServerAction extends AnAction implements MysqlProxyService
         MySQLProxyServerService service = project.getService(MySQLProxyServerService.class);
         if (service.isServiceRunning()) {
             service.stopService();
+            onServiceStateChanged(false, e);
         } else {
             service.startService();
+            onServiceStateChanged(true, e);
         }
     }
 
     @Override
     public void update(@NotNull AnActionEvent e) {
         project = e.getProject();
-        anActionEvent = e;
 
         if (project == null) {
             logger.error("get project failed,return null");
@@ -49,24 +46,29 @@ public class RunOrStopServerAction extends AnAction implements MysqlProxyService
         }
 
         MySQLProxyServerService proxyServer = project.getService(MySQLProxyServerService.class);
-        proxyServer.addListener(this);  // 增加订阅状态变化
+        onServiceStateChanged(proxyServer.isServiceRunning(), e);
 
         super.update(e);
     }
 
-    @Override
-    public void onServiceStateChanged(boolean isRunning) {
-        // 使用 SwingUtilities.invokeLater() 方法
+
+    /**
+     * 更改图标，本来是用订阅模式的，但是高版本的 idea 一直不行，因此使用这种一直调用的办法。不想浪费时间耗在这里了
+     * @param isRunning
+     * @param e
+     */
+    public void onServiceStateChanged(boolean isRunning, AnActionEvent e) {
         SwingUtilities.invokeLater(() -> {
-            // 在此处执行与界面相关的操作
             if (isRunning) {
-                Icon supendIcon = IconLoader.getIcon("/icons/supend.svg", RunOrStopServerAction.class);
-                anActionEvent.getPresentation().setIcon(supendIcon);  // 运行中，展示停止图标
-                anActionEvent.getPresentation().setText("Stop 'Mysql Proxy Server'");
+                Icon suspendIcon = IconLoader.getIcon("/icons/suspend.svg", RunOrStopServerAction.class);
+                e.getPresentation().setIcon(suspendIcon);
+                e.getPresentation().setText("Stop 'Mysql Proxy Server'");
+                logger.info("change icon to /icons/suspend.svg");
             } else {
                 Icon threadRunningIcon = IconLoader.getIcon("/icons/threadRunning.svg", RunOrStopServerAction.class);
-                anActionEvent.getPresentation().setIcon(threadRunningIcon); // 停止中，展示启动图标
-                anActionEvent.getPresentation().setText("Start 'Mysql Proxy Server'");
+                e.getPresentation().setIcon(threadRunningIcon);
+                e.getPresentation().setText("Start 'Mysql Proxy Server'");
+                logger.info("change icon to /icons/threadRunning.svg");
             }
         });
     }
