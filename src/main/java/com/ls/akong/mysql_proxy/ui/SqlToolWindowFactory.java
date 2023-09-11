@@ -116,7 +116,7 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
 
         // 把 panel 放到 toolWindow 里
         ContentManager contentManager = toolWindow.getContentManager();
-        Content content = ContentFactory.SERVICE.getInstance().createContent(panel, "", false);
+        Content content = ContentFactory.SERVICE.getInstance().createContent(panel, "好友版", false);
         contentManager.addContent(content);
         contentManager.setSelectedContent(content);
 
