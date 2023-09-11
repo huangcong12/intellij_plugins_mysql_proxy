@@ -8,7 +8,6 @@ import com.intellij.openapi.ui.Messages;
 import com.ls.akong.mysql_proxy.model.SqlLogFilterModel;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
 import org.h2.jdbcx.JdbcConnectionPool;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.sql.Connection;
@@ -21,7 +20,7 @@ public final class DatabaseManagerService {
 
     private Connection connection;
 
-    public DatabaseManagerService(@NotNull Project project) {
+    public DatabaseManagerService(Project project) {
         try {
             String pluginDataDirPath = PathManager.getPluginsPath() + File.separator + "sql_proxy" + File.separator + project.getName() + File.separator;
             File pluginDataDir = new File(pluginDataDirPath);

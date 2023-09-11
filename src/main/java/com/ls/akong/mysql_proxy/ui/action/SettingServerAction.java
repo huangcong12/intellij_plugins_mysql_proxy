@@ -4,12 +4,11 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.ls.akong.mysql_proxy.ui.MysqlProxyConfigurable;
-import org.jetbrains.annotations.NotNull;
 
 public class SettingServerAction extends AnAction {
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
+    public void actionPerformed(AnActionEvent e) {
         ShowSettingsUtil.getInstance().showSettingsDialog(e.getProject(), MysqlProxyConfigurable.class);
     }
 }

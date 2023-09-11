@@ -5,7 +5,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
 import com.ls.akong.mysql_proxy.services.MyTableView;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 点击 “CleanSqlLog” 按钮后调用
@@ -13,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 public class CleanSqlLogAction extends AnAction {
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
+    public void actionPerformed(AnActionEvent e) {
         Project project = e.getProject();
         if (project == null) {
             return;

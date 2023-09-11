@@ -18,7 +18,6 @@ import com.ls.akong.mysql_proxy.services.MySQLProxyServerService;
 import com.ls.akong.mysql_proxy.services.MyTableView;
 import com.ls.akong.mysql_proxy.services.MysqlProxyServiceStateListener;
 import com.ls.akong.mysql_proxy.ui.action.RecordingSwitchAction;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -36,7 +35,7 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
      * 启动一个新 tool windows，编辑器启动完成后，自动调用。只运行一遍，ToolWindowFactory 规定必须要实现
      */
     @Override
-    public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+    public void createToolWindowContent(Project project, ToolWindow toolWindow) {
         this.toolWindow = toolWindow;
 
         // 新建一个 panel

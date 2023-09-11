@@ -6,7 +6,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.ls.akong.mysql_proxy.services.MySQLProxyServerService;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
@@ -18,7 +17,7 @@ public class RunOrStopServerAction extends AnAction {
     private Project project;
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
+    public void actionPerformed(AnActionEvent e) {
         project = e.getProject();
 
         if (project == null) {
@@ -37,7 +36,7 @@ public class RunOrStopServerAction extends AnAction {
     }
 
     @Override
-    public void update(@NotNull AnActionEvent e) {
+    public void update(AnActionEvent e) {
         project = e.getProject();
 
         if (project == null) {
@@ -54,6 +53,7 @@ public class RunOrStopServerAction extends AnAction {
 
     /**
      * 更改图标，本来是用订阅模式的，但是高版本的 idea 一直不行，因此使用这种一直调用的办法。不想浪费时间耗在这里了
+     *
      * @param isRunning
      * @param e
      */

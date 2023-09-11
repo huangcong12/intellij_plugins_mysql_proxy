@@ -5,7 +5,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Comparing;
 import com.ls.akong.mysql_proxy.services.MysqlProxySettings;
-import org.jetbrains.annotations.Nls;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -13,16 +12,14 @@ import java.util.Objects;
 
 public class MysqlProxyConfigurable implements Configurable {
 
-    private ConfigurableForm configurableForm;
-
     private final Project project;  // Project object to store the passed project
+    private ConfigurableForm configurableForm;
 
     // Constructor to receive the Project object
     public MysqlProxyConfigurable(Project project) {
         this.project = project;
     }
 
-    @Nls
     @Override
     public String getDisplayName() {
         return "Mysql Proxy Plugin Configuration";
