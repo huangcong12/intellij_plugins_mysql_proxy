@@ -16,7 +16,7 @@
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-        <h3> Tool for Monitoring Code Execution CRUD. </h3>
+        <h3> Tool for Monitoring Code Execution CURD. </h3>
         <br/>
         <p> During the process of API development, whether it's troubleshooting or debugging, it's crucial to know which SQL statements have just been executed. While some modern frameworks make this information easily accessible, dealing with older frameworks can be quite cumbersome. This tool was born to address the challenge of quickly inspecting executed SQL statements within legacy frameworks. With its assistance, every SQL statement within older frameworks can be effortlessly revealed.</p>
         <br/>
