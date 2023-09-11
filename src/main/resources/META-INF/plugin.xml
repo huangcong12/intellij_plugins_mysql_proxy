@@ -119,7 +119,7 @@
         <group id="MysqlProxy.LeftToolbar" text="Left Tool Bar">
             <action class="com.ls.akong.mysql_proxy.ui.action.RunOrStopServerAction" id="StopServer"
                     text="Stop Sql Proxy Server" description="Stop sql proxy server"
-                    icon="com.intellij.execution.testframework.sm.runner.ui.SMPoolOfTestIcons.RUNNING_ICON"/>
+                    icon="/icons/suspend.svg"/>
             <action class="com.ls.akong.mysql_proxy.ui.action.CleanSqlLogAction" id="CleanSqlLog"
                     text="Clear All Sql Log"
                     description="Clean up all sql logs in the record" icon="/icons/clean_all.svg"/>
