@@ -18,6 +18,8 @@ import java.sql.Statement;
 public final class DatabaseManagerService {
     private static final Logger logger = Logger.getInstance(DatabaseManagerService.class);
 
+    // 如果表结构不能先后兼容，可以改变这个值，重新建一个数据库、表
+    private final int version = 1;
     private Connection connection;
 
     public DatabaseManagerService(Project project) {
@@ -32,7 +34,7 @@ public final class DatabaseManagerService {
                 }
             }
 
-            String dbFilePath = pluginDataDirPath + "h2database";
+            String dbFilePath = pluginDataDirPath + version + "_h2database";
             logger.info("H2 database file: " + dbFilePath);
 
             // 创建H2数据库的内置连接池
