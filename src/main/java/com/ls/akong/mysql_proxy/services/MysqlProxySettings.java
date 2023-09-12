@@ -5,7 +5,6 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -28,7 +27,7 @@ public final class MysqlProxySettings implements PersistentStateComponent<MysqlP
     }
 
     @Override
-    public void loadState(@NotNull State state) {
+    public void loadState(State state) {
         myState = state;
     }
 

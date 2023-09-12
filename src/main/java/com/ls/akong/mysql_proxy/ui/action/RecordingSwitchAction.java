@@ -5,7 +5,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.IconLoader;
 import com.ls.akong.mysql_proxy.services.MysqlProxySettings;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.util.Objects;
@@ -20,7 +19,7 @@ public class RecordingSwitchAction extends AnAction {
      * 按钮点击调用
      */
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
+    public void actionPerformed(AnActionEvent e) {
         MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(Objects.requireNonNull(e.getProject()));
         logger.info("目前：" + recordingSwitch.isMonitorEnabled());
         recordingSwitch.toggleMonitorEnabled();
@@ -28,7 +27,7 @@ public class RecordingSwitchAction extends AnAction {
     }
 
     @Override
-    public void update(@NotNull AnActionEvent e) {
+    public void update(AnActionEvent e) {
         super.update(e);
         updateIcon(e);
     }

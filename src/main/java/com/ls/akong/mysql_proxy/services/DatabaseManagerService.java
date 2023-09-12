@@ -8,7 +8,6 @@ import com.intellij.openapi.ui.Messages;
 import com.ls.akong.mysql_proxy.model.SqlLogFilterModel;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
 import org.h2.jdbcx.JdbcConnectionPool;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.sql.Connection;
@@ -19,9 +18,11 @@ import java.sql.Statement;
 public final class DatabaseManagerService {
     private static final Logger logger = Logger.getInstance(DatabaseManagerService.class);
 
+    // 如果表结构不能先后兼容，可以改变这个值，重新建一个数据库、表
+    private final int version = 1;
     private Connection connection;
 
-    public DatabaseManagerService(@NotNull Project project) {
+    public DatabaseManagerService(Project project) {
         try {
             String pluginDataDirPath = PathManager.getPluginsPath() + File.separator + "sql_proxy" + File.separator + project.getName() + File.separator;
             File pluginDataDir = new File(pluginDataDirPath);
@@ -33,7 +34,7 @@ public final class DatabaseManagerService {
                 }
             }
 
-            String dbFilePath = pluginDataDirPath + "h2database";
+            String dbFilePath = pluginDataDirPath + version + "_h2database";
             logger.info("H2 database file: " + dbFilePath);
 
             // 创建H2数据库的内置连接池
