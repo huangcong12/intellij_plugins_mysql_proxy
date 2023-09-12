@@ -35,8 +35,7 @@ public class StmtExecute {
         }
 
         // 20230912 根据松哥提供的 yylAdmin 项目研究出来的，也不懂为啥这样计算
-        int position = (13 + new byte[(paramsList.length + 7) / 8].length);
-        position += 2;
+        int position = (15 + new byte[(paramsList.length + 7) / 8].length);
 
         List<Integer> paramsType = new ArrayList<>();
         for (int i = 0; i < length; i++) {
@@ -53,7 +52,7 @@ public class StmtExecute {
                 case MySQLFields.FIELD_TYPE_STRING:
                 case MySQLFields.FIELD_TYPE_VARCHAR:
                     // 参数长度
-                    int paramLength = packetData[position++];
+                    int paramLength = packetData[position++] & 0xff;
 
                     paramsList[i] = "`" + new String(Arrays.copyOfRange(packetData, position, (position + paramLength))) + "`";
                     // 调整指针位置
