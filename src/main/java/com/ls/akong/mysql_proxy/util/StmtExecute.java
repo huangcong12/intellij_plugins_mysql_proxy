@@ -34,9 +34,11 @@ public class StmtExecute {
             return paramsList;
         }
 
-        // 先获取参数的类型
+        // 20230912 根据松哥提供的 yylAdmin 项目研究出来的，也不懂为啥这样计算
+        int position = (13 + new byte[(paramsList.length + 7) / 8].length);
+        position += 2;
+
         List<Integer> paramsType = new ArrayList<>();
-        int position = paramsStartPosition;
         for (int i = 0; i < length; i++) {
             paramsType.add(packetData[position++] & 0xff | (packetData[position++] & 0xff) << 8);
         }
