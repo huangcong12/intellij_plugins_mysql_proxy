@@ -6,8 +6,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.ls.akong.mysql_proxy.services.MySQLProxyServerService;
-import com.ls.akong.mysql_proxy.services.MysqlProxyServiceStateListener;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
@@ -52,8 +50,7 @@ public class RunOrStopServerAction extends AnAction {
         super.update(e);
     }
 
-    @Override
-    public void onServiceStateChanged(boolean isRunning) {
+    public void onServiceStateChanged(boolean isRunning, AnActionEvent e) {
         // 使用 SwingUtilities.invokeLater() 方法
         SwingUtilities.invokeLater(() -> {
             if (isRunning) {
