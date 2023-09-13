@@ -14,7 +14,7 @@ import com.intellij.ui.SearchTextField;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.content.ContentManager;
-import com.ls.akong.mysql_proxy.services.MySQLProxyServerService;
+import com.ls.akong.mysql_proxy.services.MySQLProxyServer;
 import com.ls.akong.mysql_proxy.services.MyTableView;
 import com.ls.akong.mysql_proxy.services.MysqlProxyServiceStateListener;
 import com.ls.akong.mysql_proxy.ui.action.RecordingSwitchAction;
@@ -120,7 +120,7 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
         contentManager.setSelectedContent(content);
 
         // 监听代理服务器状态
-        MySQLProxyServerService proxyServer = project.getService(MySQLProxyServerService.class);
+        MySQLProxyServer proxyServer = project.getService(MySQLProxyServer.class);
         proxyServer.addListener(this);  // 增加订阅状态变化
     }
 

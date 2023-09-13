@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Objects;
 
 @Service(Service.Level.PROJECT)
-public final class MySQLProxyServerService implements Disposable {
+public final class MySQLProxyServer implements Disposable {
 
-    private static final Logger logger = Logger.getInstance(MySQLProxyServerService.class);
+    private static final Logger logger = Logger.getInstance(MySQLProxyServer.class);
 
     private final Project project;
     private final List<Socket> clientSockets;
@@ -33,7 +33,7 @@ public final class MySQLProxyServerService implements Disposable {
     private ServerSocket serverSocket;
 
 
-    public MySQLProxyServerService(Project project) {
+    public MySQLProxyServer(Project project) {
         this.project = project;
 
         clientSockets = new ArrayList<>();

@@ -283,8 +283,8 @@ public final class MyTableView extends JPanel {
                     case 1:
                         String sql = item.getSql();
                         if (sql.length() > 1000) {
-                            // 截取前1000个字符并添加三个点
-                            return sql.substring(0, 500) + "...(Right-click and select 'Copy SQL' to copy everything.)";
+                            // 截取前300个字符并添加三个点
+                            return sql.substring(0, 300) + "...(Right-click and select 'Copy SQL' to copy everything.)";
                         } else {
                             return sql;
                         }

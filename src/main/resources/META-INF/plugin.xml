@@ -86,6 +86,7 @@
             <li> 1.0.4 </li>
             <ul>
                 <li>Fix the bug where H2 Database cannot use low version DB files.</li>
+                <li>Optimize the functionality for retrieving parameters in prepared SQL statements.</li>
             </ul>
             <li> 1.0.3 </li>
             <ul>

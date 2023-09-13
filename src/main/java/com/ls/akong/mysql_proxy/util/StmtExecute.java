@@ -8,6 +8,8 @@ import java.util.List;
  * 专门用于 COM_STMT_EXECUTE 包处理的类
  */
 public class StmtExecute {
+    public static final long NULL_LENGTH = -1;
+
     /**
      * 参数起始位
      *
@@ -16,6 +18,8 @@ public class StmtExecute {
     private final int paramsStartPosition = 16;
     private byte[] packetData;
     private int length;
+
+    private int position;
 
     public StmtExecute(byte[] packetData, int length) {
         this.packetData = packetData;
@@ -35,8 +39,7 @@ public class StmtExecute {
         }
 
         // 20230912 根据松哥提供的 yylAdmin 项目研究出来的，也不懂为啥这样计算
-        int position = (13 + new byte[(paramsList.length + 7) / 8].length);
-        position += 2;
+        position = (15 + new byte[(paramsList.length + 7) / 8].length);
 
         List<Integer> paramsType = new ArrayList<>();
         for (int i = 0; i < length; i++) {
@@ -53,11 +56,15 @@ public class StmtExecute {
                 case MySQLFields.FIELD_TYPE_STRING:
                 case MySQLFields.FIELD_TYPE_VARCHAR:
                     // 参数长度
-                    int paramLength = packetData[position++];
+                    int paramLength = (int) readLength();
+                    if (paramLength == NULL_LENGTH) {
+                        paramsList[i] = null;
+                    } else {
+                        paramsList[i] = "`" + new String(Arrays.copyOfRange(packetData, position, (position + paramLength))) + "`";
+                        // 调整指针位置
+                        position += paramLength - 1;
+                    }
 
-                    paramsList[i] = "`" + new String(Arrays.copyOfRange(packetData, position, (position + paramLength))) + "`";
-                    // 调整指针位置
-                    position += paramLength - 1;
                     break;
                 default:
                     paramsList[i] = "`Unknown type`:" + paramType;
@@ -70,5 +77,26 @@ public class StmtExecute {
         }
 
         return paramsList;
+    }
+
+    public long readLength() {
+        int length = packetData[position++] & 0xff;
+        switch (length) {
+            case 251:
+                return NULL_LENGTH;
+            case 252:
+                return packetData[position++] & 0xff | (packetData[position++] & 0xff) << 8;
+            case 253:
+                return packetData[position++] & 0xff | (packetData[position++] & 0xff) << 8 | (packetData[position++] & 0xff) << 16;
+            case 254:
+                return packetData[position++] & 0xff | (packetData[position++] & 0xff) << 8 | (packetData[position++] & 0xff) << 16
+                        | (long) (packetData[position++] & 0xff) << 24
+                        | (long) (packetData[position++] & 0xff) << 32
+                        | (long) (packetData[position++] & 0xff) << 40
+                        | (long) (packetData[position++] & 0xff) << 48
+                        | (long) (packetData[position++] & 0xff) << 56;
+            default:
+                return length;
+        }
     }
 }

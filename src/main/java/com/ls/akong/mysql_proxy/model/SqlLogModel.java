@@ -4,7 +4,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.ls.akong.mysql_proxy.entity.SqlLog;
 import com.ls.akong.mysql_proxy.services.DatabaseManagerService;
-import com.ls.akong.mysql_proxy.services.MyTableView;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 public class SqlLogModel {
     private static final Logger logger = Logger.getInstance(SqlLogModel.class);
     private static final int INSERT_INTERVAL_MS = 100;
+
+    private static final int MAX_PAGE_SIZE = 100000;
 
     private static Map<String, BlockingQueue<String>> projectLogQueues = new HashMap<>();
     private static Map<String, Thread> logInsertThreads = new HashMap<>();
@@ -117,10 +118,11 @@ public class SqlLogModel {
 
         querySQL += " AND sql NOT IN (SELECT sql FROM sql_log_filter) ORDER BY id DESC";
 
-        // 非前增、时间搜索的，才用分页
-        if (minLimitId == 0 && selectedTimeRange.equals("No Limit")) {
-            querySQL += " LIMIT 0," + pageSize;
+        // 非前增、时间搜索的，才用分页。但是不做分页，也要限制最大量，防止卡死
+        if (minLimitId > 0 || !selectedTimeRange.equals("No Limit")) {
+            pageSize = MAX_PAGE_SIZE;
         }
+        querySQL += " LIMIT 0," + pageSize;
         logger.info("sql: " + querySQL);
 
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
