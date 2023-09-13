@@ -2,6 +2,7 @@ package com.ls.akong.mysql_proxy.util;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Calendar;
 
@@ -38,7 +39,7 @@ public class MySQLMessage {
         } else {
             // 普通包
             byte[] newBuffer = Arrays.copyOfRange(data, 5, length);
-            sqlBuilder.append(new String(newBuffer));
+            sqlBuilder.append(new String(newBuffer, StandardCharsets.UTF_8));
 
             // 满包才返回 sql，因为需要兼容长 sql，一条 sql 分多个包发送的情况
 //            if (!sqlBuilder.isCollectionComplete()) {
