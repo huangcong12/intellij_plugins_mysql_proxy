@@ -18,7 +18,7 @@ public class SqlLogModel {
     private static final Logger logger = Logger.getInstance(SqlLogModel.class);
     private static final int INSERT_INTERVAL_MS = 100;
 
-    private static final int MAX_PAGE_SIZE = 1000;
+    private static final int MAX_PAGE_SIZE = 100000;
 
     private static Map<String, BlockingQueue<String>> projectLogQueues = new HashMap<>();
     private static Map<String, Thread> logInsertThreads = new HashMap<>();
