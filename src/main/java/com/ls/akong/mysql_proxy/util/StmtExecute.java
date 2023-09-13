@@ -1,5 +1,6 @@
 package com.ls.akong.mysql_proxy.util;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +61,7 @@ public class StmtExecute {
                     if (paramLength == NULL_LENGTH) {
                         paramsList[i] = null;
                     } else {
-                        paramsList[i] = "`" + new String(Arrays.copyOfRange(packetData, position, (position + paramLength))) + "`";
+                        paramsList[i] = "`" + new String(Arrays.copyOfRange(packetData, position, (position + paramLength)), StandardCharsets.UTF_8) + "`";
                         // 调整指针位置
                         position += paramLength - 1;
                     }
