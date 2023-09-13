@@ -83,6 +83,10 @@
         <ul>
             <li><strong>Important Note:</strong> You can report exception-issues directly from your IDE. Please add at least a comment what you have done when it occurred / how you can reproduce it. It would be even better when add an email address so I can contact you in case of questions. </li>
 
+            <li> 1.0.5 </li>
+            <ul>
+                <li>Fix the issue of Chinese character encoding errors in SQL.</li>
+            </ul>
             <li> 1.0.4 </li>
             <ul>
                 <li>Fix the bug where H2 Database cannot use low version DB files.</li>
