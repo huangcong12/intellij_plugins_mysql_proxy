@@ -11,7 +11,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SqlLogFilterModel {
+
+    /**
+     * 检查 sql 是否已存在
+     *
+     * @param project
+     * @param sql
+     * @return
+     */
+    public static boolean isSqlLogExists(Project project, String sql) {
+        String checkSQL = "SELECT COUNT(*) FROM sql_log_filter WHERE sql = ?";
+
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(checkSQL)) {
+            preparedStatement.setString(1, sql);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                int count = resultSet.getInt(1);
+                return count > 0; // 如果 count 大于 0，表示已存在相同的 SQL
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false; // 查询出错或者没有匹配的记录
+    }
+
     public static void insertLogFilter(Project project, String sql) {
+        // 检查是否已存在这条 sql，如果已经存在，则不操作
+        if (isSqlLogExists(project, sql)) {
+            return;
+        }
+
+        // 不存在，则新增
         String insertSQL = "INSERT INTO sql_log_filter (sql, created_at) VALUES (?, ?)";
 
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
