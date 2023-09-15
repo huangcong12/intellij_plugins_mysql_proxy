@@ -84,6 +84,10 @@
     You can report exception-issues directly from your IDE. Please add at least a comment what you have done when it occurred / how you can reproduce it. It would be even better when add an email address so I can contact you in case of questions.
 
     <h2> 1.0.5 </h2>
+    <h3>Features</h3>
+    <ul>
+        <li>Add SQL Type condition search button group.</li>
+    </ul>
     <h3>Fixes</h3>
     <ul>
         <li>Fix the issue of Chinese character encoding errors in SQL.</li>
