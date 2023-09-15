@@ -79,33 +79,46 @@
 ]]></description>
 
     <change-notes><![CDATA[
-    <p>
-        <ul>
-            <li><strong>Important Note:</strong> You can report exception-issues directly from your IDE. Please add at least a comment what you have done when it occurred / how you can reproduce it. It would be even better when add an email address so I can contact you in case of questions. </li>
 
-            <li> 1.0.5 </li>
-            <ul>
-                <li>Fix the issue of Chinese character encoding errors in SQL.</li>
-            </ul>
-            <li> 1.0.4 </li>
-            <ul>
-                <li>Fix the bug where H2 Database cannot use low version DB files.</li>
-                <li>Optimize the functionality for retrieving parameters in prepared SQL statements.</li>
-            </ul>
-            <li> 1.0.3 </li>
-            <ul>
-                <li>Added parsing functionality for prepared data packets.</li>
-                <li>Optimized TableView display by showing only the first 500 characters of very long SQL statements to prevent excessive resource consumption.</li>
-                <li>Fixed a bug related to incorrect handling of combined MySQL data packet sending.</li>
-                <li>Fixed a bug where the plugin didn't start correctly with the editor.</li>
-                <li>Fixed bugs related to duplicate or missing data in the TableView.</li>
-            </ul>
-            <li> 1.0.2 </li>
-            <ul>
-                <li>adjusting the data type for saving SQL logs.</li>
-            </ul>
-        </ul>
-    </p>
+    <h2>Important Note:</h2>
+    You can report exception-issues directly from your IDE. Please add at least a comment what you have done when it occurred / how you can reproduce it. It would be even better when add an email address so I can contact you in case of questions.
+
+    <h2> 1.0.5 </h2>
+    <h3>Fixes</h3>
+    <ul>
+        <li>Fix the issue of Chinese character encoding errors in SQL.</li>
+    </ul>
+    <h2> 1.0.4 </h2>
+    <h3>Features</h3>
+    <ul>
+        <li>Optimize the functionality for retrieving parameters in prepared SQL statements.</li>
+    </ul>
+    <h3>Fixes</h3>
+    <ul>
+        <li>Fix the bug where H2 Database cannot use low version DB files.</li>
+    </ul>
+    <h2> 1.0.3 </h2>
+    <h3>Features</h3>
+    <ul>
+        <li>Added parsing functionality for prepared data packets.</li>
+        <li>Optimized TableView display by showing only the first 500 characters of very long SQL statements to prevent excessive resource consumption.</li>
+    </ul>
+    <h3>Fixes</h3>
+    <ul>
+        <li>Fixed a bug related to incorrect handling of combined MySQL data packet sending.</li>
+        <li>Fixed a bug where the plugin didn't start correctly with the editor.</li>
+        <li>Fixed bugs related to duplicate or missing data in the TableView.</li>
+    </ul>
+    <h2> 1.0.2 </h2>
+    <h3>Fixes</h3>
+    <ul>
+        <li>Adjusting the data type for saving SQL logs.</li>
+    </ul>
+    <h2> 1.0.1 </h2>
+    <ul>
+        <li>To Be Released</li>
+    </ul>
+
 ]]></change-notes>
 
     <!-- Product and plugin compatibility requirements.
