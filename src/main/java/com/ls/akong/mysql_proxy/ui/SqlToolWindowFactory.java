@@ -32,6 +32,23 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
     private ToolWindow toolWindow;
 
     /**
+     * 条件过滤
+     *
+     * @param project
+     * @param searchField
+     * @param timeRangeComboBox
+     * @param sqlTypeRangesBox
+     */
+    private static void conditionalFiltering(Project project, SearchTextField searchField, JComboBox<String> timeRangeComboBox, JComboBox<String> sqlTypeRangesBox) {
+        MyTableView tableView = MyTableView.getInstance(project);
+        MyTableView.MyTableModel myTableModel = tableView.getTableModel();
+        myTableModel.setSearchText(searchField.getText());
+        myTableModel.setSelectedTimeRange((String) timeRangeComboBox.getSelectedItem());
+        myTableModel.setSelectedSqlType((String) sqlTypeRangesBox.getSelectedItem());
+        tableView.refreshData();
+    }
+
+    /**
      * 启动一个新 tool windows，编辑器启动完成后，自动调用。只运行一遍，ToolWindowFactory 规定必须要实现
      */
     @Override
@@ -51,9 +68,12 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
         // 2、List 数据
         // 顶部 创建 SearchTextField
         SearchTextField searchField = new SearchTextField();
-        // 创建一个 JComboBox 包含时间段选项
+        // 创建一个时间段限制的 JComboBox
         String[] timeRanges = {"No Limit", "Within 10s", "Within 1m", "Within 5m", "Within 10m"};
         JComboBox<String> timeRangeComboBox = new com.intellij.openapi.ui.ComboBox<>(timeRanges);
+        // 创建一个 sql type 的 JComboBox
+        String[] sqlTypeRanges = {"All", "Select", "Update", "Delete", "Other"};
+        JComboBox<String> sqlTypeRangesBox = new com.intellij.openapi.ui.ComboBox<>(sqlTypeRanges);
 
         // 输入框监听
         searchField.addDocumentListener(new DocumentListener() {
@@ -64,11 +84,7 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
 
             private void reloadData() {
                 // 当插入文本时被调用
-                MyTableView tableView = MyTableView.getInstance(project);
-                MyTableView.MyTableModel myTableModel = tableView.getTableModel();
-                myTableModel.setSearchText(searchField.getText());
-                myTableModel.setSelectedTimeRange((String) timeRangeComboBox.getSelectedItem());
-                tableView.refreshData();
+                conditionalFiltering(project, searchField, timeRangeComboBox, sqlTypeRangesBox);
             }
 
             @Override
@@ -85,11 +101,13 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
         // 添加 ActionListener 来监听选择事件
         timeRangeComboBox.addActionListener(e -> {
             // 在这里可以根据选择的时间段进行处理
-            MyTableView tableView = MyTableView.getInstance(project);
-            MyTableView.MyTableModel myTableModel = tableView.getTableModel();
-            myTableModel.setSearchText(searchField.getText());
-            myTableModel.setSelectedTimeRange((String) timeRangeComboBox.getSelectedItem());
-            tableView.refreshData();
+            conditionalFiltering(project, searchField, timeRangeComboBox, sqlTypeRangesBox);
+        });
+
+        // 添加 ActionListener 来监听选择事件
+        sqlTypeRangesBox.addActionListener(e -> {
+            // 在这里可以根据选择的时间段进行处理
+            conditionalFiltering(project, searchField, timeRangeComboBox, sqlTypeRangesBox);
         });
 
         // 创建一个新的 JPanel，包含 ActionToolbar 和 SearchTextField
@@ -98,6 +116,8 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
         topToolbarPanel.add(searchField);
         topToolbarPanel.add(new JLabel("Time Range:"));
         topToolbarPanel.add(timeRangeComboBox);
+        topToolbarPanel.add(new JLabel("SQL Type:"));
+        topToolbarPanel.add(sqlTypeRangesBox);
 
         JBSplitter sqlListSplitter = new JBSplitter(true, 0.01f);
         // 顶部按钮

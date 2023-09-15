@@ -74,7 +74,7 @@ public class SqlLogModel {
         }
     }
 
-    public static List<SqlLog> queryLogs(Project project, String searchText, String selectedTimeRange, int maxLimitId, int minLimitId, int pageSize) {
+    public static List<SqlLog> queryLogs(Project project, String searchText, String selectedTimeRange, String sqlType, int maxLimitId, int minLimitId, int pageSize) {
         List<SqlLog> logEntries = new ArrayList<>();
         String querySQL = "SELECT * FROM sql_log WHERE 1 ";
         // 条件搜索
@@ -113,6 +113,23 @@ public class SqlLogModel {
                 querySQL += " AND id<" + maxLimitId;
             } else if (minLimitId > 0) {    // 前补
                 querySQL += " AND id>" + minLimitId;
+            }
+        }
+
+        if (!Objects.equals(sqlType, "All")) {
+            switch (sqlType) {
+                case "Select":
+                    querySQL += " AND (`sql` LIKE '%SELECT%') ";
+                    break;
+                case "Update":
+                    querySQL += " AND (`sql` LIKE '%UPDATE%') ";
+                    break;
+                case "Delete":
+                    querySQL += " AND (`sql` LIKE '%DELETE%') ";
+                    break;
+                case "Other":
+                    querySQL += " AND (`sql` NOT LIKE '%SELECT%' AND `sql` NOT LIKE '%UPDATE%' AND `sql` NOT LIKE '%DELETE%') ";
+                    break;
             }
         }
 

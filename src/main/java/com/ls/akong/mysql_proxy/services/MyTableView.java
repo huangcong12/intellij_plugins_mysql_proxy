@@ -191,6 +191,8 @@ public final class MyTableView extends JPanel {
         private String searchText = "";   // 搜索框
         private String selectedTimeRange = "No Limit";  // 时间限制
 
+        private String sqlType = "All"; // sql 类型限制
+
         public MyTableModel(Project project) {
             this.project = project;
             refreshData();
@@ -216,11 +218,15 @@ public final class MyTableView extends JPanel {
             this.selectedTimeRange = selectedTimeRange;
         }
 
+        public void setSelectedSqlType(String sqlType) {
+            this.sqlType = sqlType;
+        }
+
         /**
          * 加载数据，首次启动会调用这个方法
          */
         public synchronized void refreshData() {
-            data = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, 0, 0, pageSize);
+            data = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, sqlType, 0, 0, pageSize);
         }
 
         /**
@@ -244,7 +250,7 @@ public final class MyTableView extends JPanel {
          * 加载数据，sql_log 有新增数据的时候，会调用这个方法
          */
         public synchronized int preRefreshData() {
-            List<SqlLog> newDataList = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, 0, getFirstItemId(), pageSize);
+            List<SqlLog> newDataList = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, sqlType, 0, getFirstItemId(), pageSize);
             if (newDataList.isEmpty()) {  // 兼容这些 SQL 已被添加到过滤表的场景
                 return 0;
             }
@@ -301,7 +307,7 @@ public final class MyTableView extends JPanel {
 
         @Override
         public String getColumnName(int columnIndex) {
-            String[] columnNames = {"Sequence", "Sql", "Date"};
+            String[] columnNames = {"Sequence", "SQL", "Date"};
             return columnNames[columnIndex];
         }
 
@@ -314,7 +320,7 @@ public final class MyTableView extends JPanel {
                 return;
             }
 
-            List<SqlLog> list = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, lastItemId, 0, pageSize);
+            List<SqlLog> list = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, sqlType, lastItemId, 0, pageSize);
             if (list.size() == 0) {
                 return;
             }
