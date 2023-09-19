@@ -1,6 +1,7 @@
 package com.ls.akong.mysql_proxy.services;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBScrollPane;
@@ -18,9 +19,8 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.Objects;
 import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 
 @Service(Service.Level.PROJECT)
@@ -80,9 +80,25 @@ public final class MyTableView extends JPanel {
             }
         });
 
+        // EverSQL 查询分析
+        JMenuItem optimizeWithEverSql = new JMenuItem("Optimize with EverSQL (Premium)");    // Icons.ADD_ICON
+        optimizeWithEverSql.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow != -1) {
+                Object id = table.getModel().getValueAt(selectedRow, 0); // 假设 id 是表的第一列
+                String sql = tableModel.getSqlById((Integer) id);
+
+                String url = "https://www.eversql.com/sql-query-optimizer/?utm_source=plugin&utm_campaign=jetbrains&query=" + Base64.getEncoder().encodeToString(sql.getBytes());
+                BrowserUtil.browse(url);
+            }
+        });
+
         popupMenu.add(copyItem);
-        popupMenu.add(deleteItem);
+        popupMenu.addSeparator();
+        popupMenu.add(optimizeWithEverSql);
+        popupMenu.addSeparator();
         popupMenu.add(ignoreSqlLogItem);
+        popupMenu.add(deleteItem);
 
         table.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
