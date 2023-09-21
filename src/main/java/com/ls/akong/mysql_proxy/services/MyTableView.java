@@ -151,14 +151,19 @@ public final class MyTableView extends JPanel {
         return project.getService(MyTableView.class);
     }
 
-    // 展示后回调
+    /**
+     * 展示后回调设置 TableView 每一列宽度
+     *
+     * @param table
+     */
     private void adjustColumnWidths(JBTable table) {
         // 重新根据当前编辑器大小设置每列的宽度
         int totalWidth = table.getWidth();
         TableColumnModel columnModel = table.getColumnModel();
         columnModel.getColumn(0).setPreferredWidth(totalWidth * 7 / 100);
-        columnModel.getColumn(1).setPreferredWidth(totalWidth * 79 / 100);
-        columnModel.getColumn(2).setPreferredWidth(totalWidth * 14 / 100);
+        columnModel.getColumn(1).setPreferredWidth(totalWidth * 70 / 100);
+        columnModel.getColumn(2).setPreferredWidth(totalWidth * 5 / 100);
+        columnModel.getColumn(3).setPreferredWidth(totalWidth * 14 / 100);
     }
 
     // 返回顶部
