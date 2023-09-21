@@ -10,10 +10,10 @@ import java.time.format.DateTimeFormatter;
  * Sql 日志记录表
  */
 public class SqlLog {
+    private static String tableName = "sql_log1";
     private final int id;
     private final String sql;
     private final Long createdAt;
-
     private final long executionTime;
 
     public SqlLog(int id, String sql, Long createdAt, long executionTime) {
@@ -21,6 +21,10 @@ public class SqlLog {
         this.sql = sql;
         this.createdAt = createdAt;
         this.executionTime = executionTime;
+    }
+
+    public static String getTableName() {
+        return tableName;
     }
 
     public int getId() {

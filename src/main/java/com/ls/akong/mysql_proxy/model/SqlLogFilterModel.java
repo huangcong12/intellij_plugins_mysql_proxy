@@ -20,7 +20,7 @@ public class SqlLogFilterModel {
      * @return
      */
     public static boolean isSqlLogExists(Project project, String sql) {
-        String checkSQL = "SELECT COUNT(*) FROM sql_log_filter WHERE sql = ?";
+        String checkSQL = "SELECT COUNT(*) FROM " + SqlLogFilter.getTableName() + " WHERE sql = ?";
 
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
         try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(checkSQL)) {
@@ -44,7 +44,7 @@ public class SqlLogFilterModel {
         }
 
         // 不存在，则新增
-        String insertSQL = "INSERT INTO sql_log_filter (sql, created_at) VALUES (?, ?)";
+        String insertSQL = "INSERT INTO " + SqlLogFilter.getTableName() + " (sql, created_at) VALUES (?, ?)";
 
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
         try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(insertSQL)) {
@@ -58,7 +58,7 @@ public class SqlLogFilterModel {
 
     public static List<SqlLogFilter> querySqlLogFilter(Project project) {
         List<SqlLogFilter> logEntries = new ArrayList<>();
-        String querySQL = "SELECT * FROM sql_log_filter ORDER BY id DESC";
+        String querySQL = "SELECT * FROM " + SqlLogFilter.getTableName() + " ORDER BY id DESC";
 
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
         try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(querySQL);
@@ -77,7 +77,7 @@ public class SqlLogFilterModel {
     }
 
     public static void deleteDataById(Project project, int id) {
-        String sql = "DELETE FROM sql_log_filter WHERE id = ?";
+        String sql = "DELETE FROM " + SqlLogFilter.getTableName() + " WHERE id = ?";
 
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
         try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(sql)) {
@@ -89,7 +89,7 @@ public class SqlLogFilterModel {
     }
 
     public static void updateDataById(Project project, int id, String newSql) {
-        String sql = "UPDATE sql_log_filter SET sql = ? WHERE id = ?";
+        String sql = "UPDATE " + SqlLogFilter.getTableName() + " SET sql = ? WHERE id = ?";
 
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
         try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(sql)) {
@@ -105,7 +105,7 @@ public class SqlLogFilterModel {
      * 建表 SQL
      */
     public static String getCreateTableSql() {
-        return "CREATE TABLE IF NOT EXISTS sql_log_filter (" +
+        return "CREATE TABLE IF NOT EXISTS " + SqlLogFilter.getTableName() + " (" +
                 "id INT AUTO_INCREMENT PRIMARY KEY, " +
                 "sql CLOB, " +
                 "created_at BIGINT)";

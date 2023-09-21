@@ -3,6 +3,7 @@ package com.ls.akong.mysql_proxy.model;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.ls.akong.mysql_proxy.entity.SqlLog;
+import com.ls.akong.mysql_proxy.entity.SqlLogFilter;
 import com.ls.akong.mysql_proxy.services.DatabaseManagerService;
 
 import java.sql.PreparedStatement;
@@ -22,8 +23,6 @@ public class SqlLogModel {
 
     private static Map<String, BlockingQueue<String>> projectLogQueues = new HashMap<>();
     private static Map<String, Thread> logInsertThreads = new HashMap<>();
-
-    private static String tableName = "sql_log1";
 
     /**
      * 使用队列的方式保存 sql
@@ -69,7 +68,7 @@ public class SqlLogModel {
     }
 
     private static void insertLogIntoDatabase(Project project, String sql) {
-        String insertSQL = "INSERT INTO " + tableName + " (sql, created_at) VALUES (?, ?)";
+        String insertSQL = "INSERT INTO " + SqlLog.getTableName() + " (sql, created_at) VALUES (?, ?)";
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
 
         try {
@@ -84,7 +83,7 @@ public class SqlLogModel {
 
     public static List<SqlLog> queryLogs(Project project, String searchText, String selectedTimeRange, String sqlType, int maxLimitId, int minLimitId, int pageSize) {
         List<SqlLog> logEntries = new ArrayList<>();
-        String querySQL = "SELECT * FROM " + tableName + " WHERE 1 ";
+        String querySQL = "SELECT * FROM " + SqlLog.getTableName() + " WHERE 1 ";
         // 条件搜索
         if (!Objects.equals(searchText, "") && searchText.length() > 0) {
             querySQL += " AND sql LIKE '%" + searchText + "%'";
@@ -141,7 +140,7 @@ public class SqlLogModel {
             }
         }
 
-        querySQL += " AND sql NOT IN (SELECT sql FROM sql_log_filter) ORDER BY id DESC";
+        querySQL += " AND sql NOT IN (SELECT sql FROM " + SqlLogFilter.getTableName() + ") ORDER BY id DESC";
 
         // 非前增、时间搜索的，才用分页。但是不做分页，也要限制最大量，防止卡死
         if (minLimitId > 0 || !selectedTimeRange.equals("No Limit")) {
@@ -168,7 +167,7 @@ public class SqlLogModel {
     }
 
     public static SqlLog getById(Project project, int id) {
-        String querySQL = "SELECT * FROM " + tableName + " WHERE id=? ";
+        String querySQL = "SELECT * FROM " + SqlLog.getTableName() + " WHERE id=? ";
 
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
         try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(querySQL)) {
@@ -193,7 +192,7 @@ public class SqlLogModel {
 
     // 重置 sql log 表，并且 id 从 1 开始
     public static void truncateSqlLog(Project project) {
-        String truncateSQL = "TRUNCATE TABLE " + tableName + " RESTART IDENTITY";
+        String truncateSQL = "TRUNCATE TABLE " + SqlLog.getTableName() + " RESTART IDENTITY";
 
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
         try (Statement statement = databaseManager.getConnection().createStatement()) {
@@ -207,11 +206,11 @@ public class SqlLogModel {
      * 建表 SQL
      */
     public static String getCreateTableSql() {
-        return "CREATE TABLE IF NOT EXISTS " + tableName + " (id INT AUTO_INCREMENT PRIMARY KEY, sql CLOB,execution_time BIGINT, created_at BIGINT)";
+        return "CREATE TABLE IF NOT EXISTS " + SqlLog.getTableName() + " (id INT AUTO_INCREMENT PRIMARY KEY, sql CLOB,execution_time BIGINT, created_at BIGINT)";
     }
 
     public static void deleteDataById(Project project, int id) {
-        String sql = "DELETE FROM " + tableName + " WHERE id = ?";
+        String sql = "DELETE FROM " + SqlLog.getTableName() + " WHERE id = ?";
 
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
         try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(sql)) {
@@ -223,7 +222,7 @@ public class SqlLogModel {
     }
 
     public static int insertLog(Project project, String sql) {
-        String insertSQL = "INSERT INTO " + tableName + " (sql, created_at) VALUES (?, ?)";
+        String insertSQL = "INSERT INTO " + SqlLog.getTableName() + " (sql, created_at) VALUES (?, ?)";
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
 
         try {
@@ -255,7 +254,7 @@ public class SqlLogModel {
      */
     public static boolean updateExecutionTime(Project project, long id, long executionTime) {
         // SQL UPDATE语句
-        String updateSQL = "UPDATE " + tableName + " SET execution_time = ? WHERE id = ?";
+        String updateSQL = "UPDATE " + SqlLog.getTableName() + " SET execution_time = ? WHERE id = ?";
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
 
         try {
