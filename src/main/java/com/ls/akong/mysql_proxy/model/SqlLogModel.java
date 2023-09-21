@@ -234,8 +234,7 @@ public class SqlLogModel {
             // 获取生成的键
             ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
             if (generatedKeys.next()) {
-                int generatedId = generatedKeys.getInt(1); // 假设生成的键是一个整型
-                return generatedId;
+                return generatedKeys.getInt(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
