@@ -61,7 +61,7 @@ public class StmtExecute {
                     if (paramLength == NULL_LENGTH) {
                         paramsList[i] = null;
                     } else {
-                        paramsList[i] = "`" + new String(Arrays.copyOfRange(packetData, position, (position + paramLength)), StandardCharsets.UTF_8) + "`";
+                        paramsList[i] = "'" + new String(Arrays.copyOfRange(packetData, position, (position + paramLength)), StandardCharsets.UTF_8) + "'";
                         // 调整指针位置
                         position += paramLength - 1;
                     }
