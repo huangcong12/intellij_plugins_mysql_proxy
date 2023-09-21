@@ -55,7 +55,8 @@ public class MySQLMessage {
         String sql = sqlBuilder.toString();
         sqlBuilder.reset();
 
-        if (sql.contains("mysql_native_password")) {    // mysql_native_password 是发送账号密码
+        if (sql.contains("mysql_native_password")   // mysql_native_password 是发送账号密码
+                || !sql.contains(" ")) {            // 只有一个单词的情况
             return "";
         }
 
