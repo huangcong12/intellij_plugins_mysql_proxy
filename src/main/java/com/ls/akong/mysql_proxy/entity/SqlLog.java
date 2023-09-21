@@ -59,6 +59,10 @@ public class SqlLog {
      * @return
      */
     public String getExecutionTime() {
-        return executionTime + "ms";
+        if (executionTime >= 1000) {
+            double seconds = executionTime / 1000.0;
+            return String.format("%.2f s", seconds);
+        }
+        return executionTime + " ms";
     }
 }
