@@ -28,8 +28,10 @@ public final class MyTableView extends JPanel {
     private final MyTableModel tableModel;
 
     private final JBTable table;
-
+    private final int maxDataCount = 100; // 设置一次刷新的最大数据量
+    private final long refreshInterval = 100; // 设置刷新的时间间隔（毫秒）
     private Timer debounceTimer = new Timer();
+    private int dataCount = 0; // 数据计数器
 
     private MyTableView(Project project) {
         tableModel = new MyTableModel(project);
@@ -171,27 +173,40 @@ public final class MyTableView extends JPanel {
         table.scrollRectToVisible(new Rectangle(0, 0, 0, 0));
     }
 
-    // 在插入新数据后调用此方法以更新 TableView
+    /**
+     * 在插入新数据后调用此方法以更新 TableView
+     * 每次调用延迟 100 ms 刷新；假如满 100 条数据也刷新
+     */
     public void updateData() {
-        // 取消之前的定时任务
-        debounceTimer.cancel();
-        // 创建一个新的定时任务，在指定时间后执行通知操作
-        debounceTimer = new Timer();
-        debounceTimer.schedule(new TimerTask() {
-            /**
-             *  延时执行，防抖动。兼容瞬间来太多数据的情况
-             */
-            @Override
-            public void run() {
-                int preRefreshDataCount = tableModel.preRefreshData();
-                if (preRefreshDataCount == 0) {
-                    return;
-                }
+        dataCount++; // 增加数据计数
 
-                // 在 EDT 更新表格
-                SwingUtilities.invokeLater(tableModel::fireTableDataChanged);
-            }
-        }, 100);
+        if (dataCount >= maxDataCount) {
+            preRefreshData(); // 达到最大数据量，执行刷新操作
+        } else {
+            debounceTimer.cancel(); // 取消之前的定时任务
+
+            debounceTimer = new Timer();
+            debounceTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    preRefreshData(); // 在指定时间后执行刷新操作
+                }
+            }, refreshInterval);
+        }
+    }
+
+    /**
+     * 刷新前置数据
+     */
+    private synchronized void preRefreshData() {
+        dataCount = 0; // 重置数据计数
+        int preRefreshDataCount = tableModel.preRefreshData();
+        if (preRefreshDataCount == 0) {
+            return;
+        }
+
+        // 在 EDT 更新表格
+        SwingUtilities.invokeLater(tableModel::fireTableDataChanged);
     }
 
     // 刷新数据，从第一页开始
