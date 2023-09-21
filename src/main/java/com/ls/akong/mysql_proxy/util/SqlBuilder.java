@@ -75,7 +75,7 @@ public class SqlBuilder {
     public String toString() {
         String sqlQuery = builder.toString().trim();
         // 去掉换行符、多个空格只保留一个
-        return sqlQuery.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll(" +", " ");
+        return sqlQuery.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll("\t", " ").replaceAll(" +", " ");
     }
 
     /**

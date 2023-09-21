@@ -8,6 +8,7 @@ import com.intellij.openapi.ui.Messages;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
 import com.ls.akong.mysql_proxy.util.MySQLMessage;
 import com.ls.akong.mysql_proxy.util.SqlBuilder;
+import com.ls.akong.mysql_proxy.util.SqlRunTimer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -201,7 +202,8 @@ public final class MySQLProxyServer implements Disposable {
                 Socket mysqlSocket = new Socket(mysqlHost, mysqlPort);
 
                 // 创建线程用于转发 MySQL 服务器的响应给客户端
-                Thread responseThread = new Thread(new ResponseHandler(clientSocket, mysqlSocket));
+                SqlRunTimer sqlRunTimer = new SqlRunTimer(project);
+                Thread responseThread = new Thread(new ResponseHandler(clientSocket, mysqlSocket, sqlRunTimer));
                 responseThread.start();
 
                 // 转发客户端请求给 MySQL 服务器
@@ -232,7 +234,11 @@ public final class MySQLProxyServer implements Disposable {
 
                             String sql = mm.getSql();
                             if (!sql.equals("")) {
-                                SqlLogModel.insertLog(project, sql);
+                                long id = SqlLogModel.insertLog(project, sql);
+                                if (id != -1) {
+                                    sqlRunTimer.setId(id);
+                                    sqlRunTimer.startTimer();
+                                }
 
                                 // Notify the UI to update for the specified project
                                 MyTableView myTableView = MyTableView.getInstance(project);
@@ -263,9 +269,12 @@ public final class MySQLProxyServer implements Disposable {
         private final Socket clientSocket;
         private final Socket mysqlSocket;
 
-        public ResponseHandler(Socket clientSocket, Socket mysqlSocket) {
+        private SqlRunTimer sqlRunTimer;
+
+        public ResponseHandler(Socket clientSocket, Socket mysqlSocket, SqlRunTimer sqlRunTimer) {
             this.clientSocket = clientSocket;
             this.mysqlSocket = mysqlSocket;
+            this.sqlRunTimer = sqlRunTimer;
         }
 
         @Override
@@ -277,9 +286,16 @@ public final class MySQLProxyServer implements Disposable {
                 byte[] buffer = new byte[4096];
                 int bytesRead;
                 while ((bytesRead = mysqlIn.read(buffer)) != -1) {
-//                    int packetLength = (buffer[0] & 0xFF) | ((buffer[1] & 0xFF) << 8) | ((buffer[2] & 0xFF) << 16); // 数据包的长度
-//                    int sequenceNumber = buffer[3] & 0xFF;  // 序号
-//                    String responseData = new String(Arrays.copyOfRange(buffer, 5, bytesRead));
+                    // 参考：https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_basic_response_packets.html
+                    int header = buffer[4] & 0xFF; // header
+                    if (header == 0x00 || header == 0xFE) {     // Update response successfully
+                        sqlRunTimer.stopTimer();
+                    } else if (header == 0xFF) {                // Update response fail
+                        sqlRunTimer.stopTimer();
+                    } else if ((buffer[bytesRead - 9] & 0xFF) == 5 && (buffer[bytesRead - 8] & 0xFF) == 0
+                            && (buffer[bytesRead - 7] & 0xFF) == 0 && (buffer[bytesRead - 5] & 0xFF) == 254) {  // Query response success
+                        sqlRunTimer.stopTimer();
+                    }
 
                     clientOut.write(buffer, 0, bytesRead);
                     clientOut.flush();

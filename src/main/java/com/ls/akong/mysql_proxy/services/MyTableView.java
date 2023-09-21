@@ -292,7 +292,7 @@ public final class MyTableView extends JPanel {
 
         @Override
         public int getColumnCount() {
-            return 3;  // 假设有 3 列
+            return 4;  // 假设有 3 列
         }
 
         @Override
@@ -310,8 +310,10 @@ public final class MyTableView extends JPanel {
                         } else {
                             return sql;
                         }
-
                     case 2:
+                        return item.getExecutionTime();
+
+                    case 3:
                         return item.getCreatedAt();
                     default:
                         return null;
@@ -323,7 +325,7 @@ public final class MyTableView extends JPanel {
 
         @Override
         public String getColumnName(int columnIndex) {
-            String[] columnNames = {"Sequence", "SQL", "Date"};
+            String[] columnNames = {"Sequence", "SQL", "Duration", "Date"};
             return columnNames[columnIndex];
         }
 

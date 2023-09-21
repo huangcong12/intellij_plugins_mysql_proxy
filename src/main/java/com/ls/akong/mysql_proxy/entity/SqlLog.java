@@ -14,10 +14,13 @@ public class SqlLog {
     private final String sql;
     private final Long createdAt;
 
-    public SqlLog(int id, String sql, Long createdAt) {
+    private final long executionTime;
+
+    public SqlLog(int id, String sql, Long createdAt, long executionTime) {
         this.id = id;
         this.sql = sql;
         this.createdAt = createdAt;
+        this.executionTime = executionTime;
     }
 
     public int getId() {
@@ -48,5 +51,14 @@ public class SqlLog {
 
         DateTimeFormatter customTimeFormatter = DateTimeFormatter.ofPattern("a h:mm:ss");
         return formattedDate + " " + zonedDateTime.format(customTimeFormatter);
+    }
+
+    /**
+     * 获取执行时间
+     *
+     * @return
+     */
+    public String getExecutionTime() {
+        return executionTime + "ms";
     }
 }
