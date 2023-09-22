@@ -18,7 +18,6 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.List;
 import java.util.Timer;
 import java.util.*;
 
@@ -352,7 +351,7 @@ public final class MyTableView extends JPanel {
                             return sql;
                         }
                     case 2:
-                        return item.getExecutionTime();
+                        return item.getFormatExecutionTime();
 
                     case 3:
                         return item.getCreatedAt();
@@ -403,7 +402,7 @@ public final class MyTableView extends JPanel {
             return sqlLog.getSql();
         }
 
-        public List<SqlLog> data() {
+        public ArrayList<SqlLog> data() {
             return data;
         }
 

@@ -4,10 +4,11 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.ls.akong.mysql_proxy.entity.SqlLog;
+import com.ls.akong.mysql_proxy.model.SqlLogModel;
 import com.ls.akong.mysql_proxy.services.MyTableView;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class CheckDataAction extends AnAction {
@@ -19,7 +20,7 @@ public class CheckDataAction extends AnAction {
         }
 
         MyTableView myTableView = MyTableView.getInstance(project);
-        List<SqlLog> data = myTableView.getTableModel().data();
+        ArrayList<SqlLog> data = myTableView.getTableModel().data();
         // 创建一个集合用于存储已经出现过的id
         Set<Integer> seenIds = new HashSet<>();
         boolean hasDuplicates = false;
@@ -49,6 +50,14 @@ public class CheckDataAction extends AnAction {
                     endId = -1;
                 }
             }
+
+            // 检查 data 里的执行时间是否和表里的一致
+            SqlLog tableSqlLog = SqlLogModel.getById(project, id);
+            assert tableSqlLog != null;
+            if (tableSqlLog.getExecutionTime() != sqlLog.getExecutionTime()) {
+                System.out.println("id:" + id + " data 的执行时间： " + sqlLog.getExecutionTime() + " 表里的执行时间：" + tableSqlLog.getExecutionTime());
+            }
+
         }
 
         if (!hasDuplicates) {

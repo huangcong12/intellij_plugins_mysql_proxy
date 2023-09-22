@@ -57,12 +57,16 @@ public class SqlLog {
         return formattedDate + " " + zonedDateTime.format(customTimeFormatter);
     }
 
+    public long getExecutionTime() {
+        return executionTime;
+    }
+
     /**
      * 获取执行时间
      *
      * @return
      */
-    public String getExecutionTime() {
+    public String getFormatExecutionTime() {
         if (executionTime >= 1000) {
             double seconds = executionTime / 1000.0;
             return String.format("%.2f s", seconds);
