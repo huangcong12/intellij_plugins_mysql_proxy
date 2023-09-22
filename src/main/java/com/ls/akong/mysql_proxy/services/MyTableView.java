@@ -246,7 +246,7 @@ public final class MyTableView extends JPanel {
     public static class MyTableModel extends AbstractTableModel {
         private final Project project;
         private final int pageSize = 50; // 每页显示的数据条数
-        private List<SqlLog> data;  // 数据集
+        private ArrayList<SqlLog> data;  // 数据集
         private String searchText = "";   // 搜索框
         private String selectedTimeRange = "No Limit";  // 时间限制
 
@@ -309,7 +309,7 @@ public final class MyTableView extends JPanel {
          * 加载数据，sql_log 有新增数据的时候，会调用这个方法
          */
         public synchronized int preRefreshData() {
-            List<SqlLog> newDataList = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, sqlType, 0, getFirstItemId(), pageSize);
+            ArrayList<SqlLog> newDataList = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, sqlType, 0, getFirstItemId(), pageSize);
             if (newDataList.isEmpty()) {  // 兼容这些 SQL 已被添加到过滤表的场景
                 return 0;
             }
@@ -317,11 +317,7 @@ public final class MyTableView extends JPanel {
             int newDataListCount = newDataList.size();
             // 不是时间搜索的，才采用补数据的方式
             if (Objects.equals(selectedTimeRange, "No Limit")) {
-                synchronized (data) {       // 暂时锁定 data
-                    newDataList.addAll(data);
-                    data.clear();
-                    data.addAll(newDataList);
-                }
+                data.addAll(0, newDataList);
             } else {
                 // 时间搜索，直接搜所有，因为数据有时效性
                 data = newDataList;
@@ -383,18 +379,15 @@ public final class MyTableView extends JPanel {
                 return;
             }
 
-            List<SqlLog> list = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, sqlType, lastItemId, 0, pageSize);
+            ArrayList<SqlLog> list = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, sqlType, lastItemId, 0, pageSize);
             if (list.size() == 0) {
                 return;
             }
 
             // 时间段搜索的话，不分页
             if (!Objects.equals(selectedTimeRange, "No Limit")) {
-                synchronized (data) {       // 暂时锁定 data
-                    data.clear();
-                    data.addAll(list);
-                    return;
-                }
+                data = list;
+                return;
             }
 
             data.addAll(list);

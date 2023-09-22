@@ -81,7 +81,7 @@ public class SqlLogModel {
         }
     }
 
-    public static List<SqlLog> queryLogs(Project project, String searchText, String selectedTimeRange, String sqlType, int maxLimitId, int minLimitId, int pageSize) {
+    public static ArrayList<SqlLog> queryLogs(Project project, String searchText, String selectedTimeRange, String sqlType, int maxLimitId, int minLimitId, int pageSize) {
         List<SqlLog> logEntries = new ArrayList<>();
         String querySQL = "SELECT * FROM " + SqlLog.getTableName() + " WHERE 1 ";
         // 条件搜索
@@ -163,7 +163,7 @@ public class SqlLogModel {
             e.printStackTrace();
         }
 
-        return logEntries;
+        return (ArrayList<SqlLog>) logEntries;
     }
 
     public static SqlLog getById(Project project, int id) {
