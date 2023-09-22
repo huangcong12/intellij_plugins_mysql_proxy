@@ -203,7 +203,7 @@ public final class MySQLProxyServer implements Disposable {
 
                 // 创建线程用于转发 MySQL 服务器的响应给客户端
                 SqlRunTimer sqlRunTimer = new SqlRunTimer(project);
-                Thread responseThread = new Thread(new ResponseHandler(clientSocket, mysqlSocket, sqlRunTimer));
+                Thread responseThread = new Thread(new ResponseHandler(clientSocket, mysqlSocket, project, sqlRunTimer));
                 responseThread.start();
 
                 // 转发客户端请求给 MySQL 服务器
@@ -234,7 +234,7 @@ public final class MySQLProxyServer implements Disposable {
 
                             String sql = mm.getSql();
                             if (!sql.equals("")) {
-                                long id = SqlLogModel.insertLog(project, sql);
+                                int id = SqlLogModel.insertLog(project, sql);
                                 if (id != -1) {
                                     sqlRunTimer.setId(id);
                                     sqlRunTimer.startTimer();
@@ -271,9 +271,12 @@ public final class MySQLProxyServer implements Disposable {
 
         private SqlRunTimer sqlRunTimer;
 
-        public ResponseHandler(Socket clientSocket, Socket mysqlSocket, SqlRunTimer sqlRunTimer) {
+        private Project project;
+
+        public ResponseHandler(Socket clientSocket, Socket mysqlSocket, Project project, SqlRunTimer sqlRunTimer) {
             this.clientSocket = clientSocket;
             this.mysqlSocket = mysqlSocket;
+            this.project = project;
             this.sqlRunTimer = sqlRunTimer;
         }
 
@@ -288,13 +291,22 @@ public final class MySQLProxyServer implements Disposable {
                 while ((bytesRead = mysqlIn.read(buffer)) != -1) {
                     // 参考：https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_basic_response_packets.html
                     int header = buffer[4] & 0xFF; // header
+                    int id = 0;
                     if (header == 0x00 || header == 0xFE) {     // Update response successfully
+                        id = sqlRunTimer.getId();
                         sqlRunTimer.stopTimer();
                     } else if (header == 0xFF) {                // Update response fail
+                        id = sqlRunTimer.getId();
                         sqlRunTimer.stopTimer();
                     } else if ((buffer[bytesRead - 9] & 0xFF) == 5 && (buffer[bytesRead - 8] & 0xFF) == 0
                             && (buffer[bytesRead - 7] & 0xFF) == 0 && (buffer[bytesRead - 5] & 0xFF) == 254) {  // Query response success
+                        id = sqlRunTimer.getId();
                         sqlRunTimer.stopTimer();
+                    }
+
+                    if (id != 0) {
+                        MyTableView myTableView = MyTableView.getInstance(project);
+                        myTableView.updateExecutionTimeById(id);
                     }
 
                     clientOut.write(buffer, 0, bytesRead);

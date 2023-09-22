@@ -33,9 +33,13 @@ public final class MyTableView extends JPanel {
     private Timer debounceTimer = new Timer();
     private int dataCount = 0; // 数据计数器
 
+    private Project project;
+
     private MyTableView(Project project) {
         tableModel = new MyTableModel(project);
         table = new JBTable(tableModel);
+
+        this.project = project;
 
         // 增加右键菜单
         JPopupMenu popupMenu = new JPopupMenu();
@@ -183,16 +187,35 @@ public final class MyTableView extends JPanel {
         if (dataCount >= maxDataCount) {
             preRefreshData(); // 达到最大数据量，执行刷新操作
         } else {
-            debounceTimer.cancel(); // 取消之前的定时任务
+            try {
+                debounceTimer.cancel(); // 取消之前的定时任务
 
-            debounceTimer = new Timer();
-            debounceTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    preRefreshData(); // 在指定时间后执行刷新操作
-                }
-            }, refreshInterval);
+                debounceTimer = new Timer();
+                debounceTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        preRefreshData(); // 在指定时间后执行刷新操作
+                    }
+                }, refreshInterval);
+            } catch (IllegalStateException e) {
+                // 不处理，等下一个线程来了再刷新吧
+            }
         }
+    }
+
+    /**
+     * 更新执行时间字段
+     *
+     * @param id
+     */
+    public void updateExecutionTimeById(int id) {
+        SqlLog sqlLog = SqlLogModel.getById(project, id);
+        if (sqlLog == null) {
+            return;
+        }
+        this.tableModel.updateExecuteTime(sqlLog);
+
+        SwingUtilities.invokeLater(tableModel::fireTableDataChanged);
     }
 
     /**
@@ -205,14 +228,14 @@ public final class MyTableView extends JPanel {
             return;
         }
 
-        // 在 EDT 更新表格
+//        ApplicationManager.getApplication().invokeLater(tableModel::fireTableDataChanged);
         SwingUtilities.invokeLater(tableModel::fireTableDataChanged);
     }
 
     // 刷新数据，从第一页开始
     public void refreshData() {
         tableModel.refreshData();
-        SwingUtilities.invokeLater(tableModel::fireTableDataChanged);  // 在 EDT 更新表格
+        SwingUtilities.invokeLater(tableModel::fireTableDataChanged);
     }
 
     public MyTableModel getTableModel() {
@@ -294,9 +317,11 @@ public final class MyTableView extends JPanel {
             int newDataListCount = newDataList.size();
             // 不是时间搜索的，才采用补数据的方式
             if (Objects.equals(selectedTimeRange, "No Limit")) {
-                newDataList.addAll(data);
-                data.clear();
-                data.addAll(newDataList);
+                synchronized (data) {       // 暂时锁定 data
+                    newDataList.addAll(data);
+                    data.clear();
+                    data.addAll(newDataList);
+                }
             } else {
                 // 时间搜索，直接搜所有，因为数据有时效性
                 data = newDataList;
@@ -365,9 +390,11 @@ public final class MyTableView extends JPanel {
 
             // 时间段搜索的话，不分页
             if (!Objects.equals(selectedTimeRange, "No Limit")) {
-                data.clear();
-                data.addAll(list);
-                return;
+                synchronized (data) {       // 暂时锁定 data
+                    data.clear();
+                    data.addAll(list);
+                    return;
+                }
             }
 
             data.addAll(list);
@@ -385,6 +412,25 @@ public final class MyTableView extends JPanel {
 
         public List<SqlLog> data() {
             return data;
+        }
+
+        /**
+         * 更新执行时间
+         *
+         * @param sqlLog
+         */
+        public void updateExecuteTime(SqlLog sqlLog) {
+            int id = sqlLog.getId();
+            synchronized (data) {       // 暂时锁定 data
+                for (int i = 0; i < data.size(); i++) {
+                    SqlLog dataItem = data.get(i);
+                    if (dataItem.getId() == id) {
+                        // 更新列表中的对象
+                        data.set(i, sqlLog);
+                        break; // 找到匹配的项后可以退出循环
+                    }
+                }
+            }
         }
     }
 }

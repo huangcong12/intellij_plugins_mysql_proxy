@@ -5,7 +5,7 @@ import com.ls.akong.mysql_proxy.model.SqlLogModel;
 
 public class SqlRunTimer {
     private final Project project;
-    private long id;
+    private int id;
     private long startTime;
 
     public SqlRunTimer(Project project) {
@@ -18,8 +18,12 @@ public class SqlRunTimer {
      *
      * @return
      */
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
+    }
+
+    public int getId() {
+        return id;
     }
 
     /**
