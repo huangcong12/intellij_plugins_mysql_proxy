@@ -125,17 +125,11 @@ public class SqlLogModel {
 
         if (!Objects.equals(sqlType, "All")) {
             switch (sqlType) {
-                case "Select":
-                    querySQL += " AND (`sql` LIKE '%SELECT%') ";
-                    break;
-                case "Update":
-                    querySQL += " AND (`sql` LIKE '%UPDATE%') ";
-                    break;
-                case "Delete":
-                    querySQL += " AND (`sql` LIKE '%DELETE%') ";
-                    break;
                 case "Other":
-                    querySQL += " AND (`sql` NOT LIKE '%SELECT%' AND `sql` NOT LIKE '%UPDATE%' AND `sql` NOT LIKE '%DELETE%') ";
+                    querySQL += " AND (`sql` NOT LIKE '%SELECT%' AND `sql` NOT LIKE '%INSERT%' AND `sql` NOT LIKE '%UPDATE%' AND `sql` NOT LIKE '%DELETE%') ";
+                    break;
+                default:
+                    querySQL += " AND (`sql` LIKE '%" + sqlType.toUpperCase() + "%') ";
                     break;
             }
         }

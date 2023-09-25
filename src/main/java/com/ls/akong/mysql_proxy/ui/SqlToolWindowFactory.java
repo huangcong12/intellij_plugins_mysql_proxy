@@ -72,7 +72,7 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
         String[] timeRanges = {"No Limit", "Within 10s", "Within 1m", "Within 5m", "Within 10m"};
         JComboBox<String> timeRangeComboBox = new com.intellij.openapi.ui.ComboBox<>(timeRanges);
         // 创建一个 sql type 的 JComboBox
-        String[] sqlTypeRanges = {"All", "Select", "Update", "Delete", "Other"};
+        String[] sqlTypeRanges = {"All", "Select", "Insert", "Update", "Delete", "Other"};
         JComboBox<String> sqlTypeRangesBox = new com.intellij.openapi.ui.ComboBox<>(sqlTypeRanges);
 
         // 输入框监听
