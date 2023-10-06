@@ -2,13 +2,19 @@ package com.ls.akong.mysql_proxy.services;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.BrowserUtil;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.ls.akong.mysql_proxy.entity.SqlLog;
 import com.ls.akong.mysql_proxy.model.SqlLogFilterModel;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
+import com.ls.akong.mysql_proxy.ui.action.RecordingSwitchAction;
+import com.ls.akong.mysql_proxy.ui.action.ScrollToTopAction;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -16,6 +22,7 @@ import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Timer;
@@ -29,10 +36,9 @@ public final class MyTableView extends JPanel {
     private final JBTable table;
     private final int maxDataCount = 100; // 设置一次刷新的最大数据量
     private final long refreshInterval = 100; // 设置刷新的时间间隔（毫秒）
+    private final Project project;
     private Timer debounceTimer = new Timer();
     private int dataCount = 0; // 数据计数器
-
-    private final Project project;
 
     private MyTableView(Project project) {
         tableModel = new MyTableModel(project);
@@ -98,12 +104,21 @@ public final class MyTableView extends JPanel {
             }
         });
 
+        // 返回顶部
+        Icon scrollToTopIcon = IconLoader.getIcon("/icons/top.svg", RecordingSwitchAction.class);
+        JMenuItem scrollToTop = new JMenuItem("Scroll To Top", scrollToTopIcon);
+        scrollToTop.addActionListener(e -> {
+            this.scrollToTop();
+        });
+
         popupMenu.add(copyItem);
         popupMenu.addSeparator();
         popupMenu.add(optimizeWithEverSql);
         popupMenu.addSeparator();
         popupMenu.add(ignoreSqlLogItem);
         popupMenu.add(deleteItem);
+        popupMenu.addSeparator();
+        popupMenu.add(scrollToTop);
 
         table.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
