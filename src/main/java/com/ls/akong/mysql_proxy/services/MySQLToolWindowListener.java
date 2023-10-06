@@ -15,9 +15,9 @@ public class MySQLToolWindowListener implements ProjectComponent {
 
     public void projectOpened() {
         // 跟随编辑器启动
-        MySQLProxyServer proxyServer = project.getService(MySQLProxyServer.class);
+        MySQLProxyHelperServer proxyServer = project.getService(MySQLProxyHelperServer.class);
         if (MysqlProxySettings.getInstance(project).isStartWithEditor()) {
-            proxyServer.startService();
+            proxyServer.startServer();
         }
     }
 }

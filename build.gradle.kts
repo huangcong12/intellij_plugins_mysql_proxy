@@ -30,6 +30,8 @@ intellij {
 dependencies {
     // https://mvnrepository.com/artifact/com.github.shyiko/mysql-binlog-connector-java
     implementation("com.h2database:h2:2.1.214")
+    // https://mvnrepository.com/artifact/io.vertx/vertx-core
+    implementation("io.vertx:vertx-core:4.4.5")
 }
 
 tasks {

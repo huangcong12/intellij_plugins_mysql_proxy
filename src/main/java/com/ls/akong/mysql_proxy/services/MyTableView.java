@@ -32,7 +32,7 @@ public final class MyTableView extends JPanel {
     private Timer debounceTimer = new Timer();
     private int dataCount = 0; // 数据计数器
 
-    private Project project;
+    private final Project project;
 
     private MyTableView(Project project) {
         tableModel = new MyTableModel(project);

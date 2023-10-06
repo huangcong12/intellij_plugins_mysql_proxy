@@ -6,25 +6,19 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 专门用于 COM_STMT_EXECUTE 包处理的类
+ * 用于把 COM_STMT_EXECUTE 的预处理 sql 填充 COM_STMT_EXECUTE 参数的类
  */
-public class StmtExecute {
+public class PreparedSqlComposer {
     public static final long NULL_LENGTH = -1;
 
-    /**
-     * 参数起始位
-     *
-     * @param int
-     */
-    private final int paramsStartPosition = 16;
-    private byte[] packetData;
-    private int length;
+    private final byte[] packetData;
+    private String sql;
 
     private int position;
 
-    public StmtExecute(byte[] packetData, int length) {
+    public PreparedSqlComposer(byte[] packetData, String sql) {
         this.packetData = packetData;
-        this.length = length;
+        this.sql = sql;
     }
 
 
@@ -34,13 +28,20 @@ public class StmtExecute {
      * @return
      */
     public Object[] params() {
+        int length = getStmtExecuteParamsLength();
         Object[] paramsList = new Object[length];
+        /**
+         * 参数起始位
+         *
+         * @param int
+         */
+        int paramsStartPosition = 16;
         if (length == 0 || packetData.length <= paramsStartPosition) {
             return paramsList;
         }
 
         // 20230912 根据松哥提供的 yylAdmin 项目研究出来的，也不懂为啥这样计算
-        position = (15 + new byte[(paramsList.length + 7) / 8].length);
+        position = (15 + (paramsList.length + 7) / 8);
 
         List<Integer> paramsType = new ArrayList<>();
         for (int i = 0; i < length; i++) {
@@ -99,5 +100,43 @@ public class StmtExecute {
             default:
                 return length;
         }
+    }
+
+    /**
+     * 获取预处理 SQL 参数的个数：统计 ? 的数量
+     *
+     * @return int
+     */
+    public int getStmtExecuteParamsLength() {
+        StringBuilder builder = new StringBuilder(sql);
+        int count = 0;
+        for (int i = 0; i < builder.length(); i++) {
+            if (builder.charAt(i) == '?') {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * 填充参数到 SQL 里
+     */
+    public void fillingParameter() {
+        int paramIndex = 0;
+        Object[] params = this.params();
+        int paramCount = params.length;
+        StringBuilder builder = new StringBuilder(sql);
+
+        while (builder.indexOf("?") != -1 && paramIndex < paramCount) {
+            int index = builder.indexOf("?");
+            builder.replace(index, index + 1, params[paramIndex].toString());
+            paramIndex++;
+        }
+
+        sql = builder.toString();
+    }
+
+    public String getSql() {
+        return sql;
     }
 }

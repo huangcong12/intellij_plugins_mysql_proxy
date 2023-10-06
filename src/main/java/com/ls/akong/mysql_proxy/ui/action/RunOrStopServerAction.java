@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
-import com.ls.akong.mysql_proxy.services.MySQLProxyServer;
+import com.ls.akong.mysql_proxy.services.MySQLProxyHelperServer;
 
 import javax.swing.*;
 
@@ -25,12 +25,12 @@ public class RunOrStopServerAction extends AnAction {
             return;
         }
 
-        MySQLProxyServer service = project.getService(MySQLProxyServer.class);
-        if (service.isServiceRunning()) {
-            service.stopService();
+        MySQLProxyHelperServer proxyServer = project.getService(MySQLProxyHelperServer.class);
+        if (proxyServer.isRunning()) {
+            proxyServer.stopServer();
             onServiceStateChanged(false, e);
         } else {
-            service.startService();
+            proxyServer.startServer();
             onServiceStateChanged(true, e);
         }
     }
@@ -44,8 +44,8 @@ public class RunOrStopServerAction extends AnAction {
             return;
         }
 
-        MySQLProxyServer proxyServer = project.getService(MySQLProxyServer.class);
-        onServiceStateChanged(proxyServer.isServiceRunning(), e);
+        MySQLProxyHelperServer proxyServer = project.getService(MySQLProxyHelperServer.class);
+        onServiceStateChanged(proxyServer.isRunning(), e);
 
         super.update(e);
     }

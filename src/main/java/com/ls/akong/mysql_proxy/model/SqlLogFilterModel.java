@@ -37,6 +37,12 @@ public class SqlLogFilterModel {
         return false; // 查询出错或者没有匹配的记录
     }
 
+    /**
+     * 新增过滤 sql
+     *
+     * @param project
+     * @param sql
+     */
     public static void insertLogFilter(Project project, String sql) {
         // 检查是否已存在这条 sql，如果已经存在，则不操作
         if (isSqlLogExists(project, sql)) {
@@ -56,6 +62,12 @@ public class SqlLogFilterModel {
         }
     }
 
+    /**
+     * 过滤 sql 列表
+     *
+     * @param project
+     * @return
+     */
     public static List<SqlLogFilter> querySqlLogFilter(Project project) {
         List<SqlLogFilter> logEntries = new ArrayList<>();
         String querySQL = "SELECT * FROM " + SqlLogFilter.getTableName() + " ORDER BY id DESC";
@@ -76,6 +88,12 @@ public class SqlLogFilterModel {
         return logEntries;
     }
 
+    /**
+     * 删除制定过滤 sql
+     *
+     * @param project
+     * @param id
+     */
     public static void deleteDataById(Project project, int id) {
         String sql = "DELETE FROM " + SqlLogFilter.getTableName() + " WHERE id = ?";
 
@@ -88,6 +106,13 @@ public class SqlLogFilterModel {
         }
     }
 
+    /**
+     * 更新制定过滤 sql 的值
+     *
+     * @param project
+     * @param id
+     * @param newSql
+     */
     public static void updateDataById(Project project, int id, String newSql) {
         String sql = "UPDATE " + SqlLogFilter.getTableName() + " SET sql = ? WHERE id = ?";
 
