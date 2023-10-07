@@ -12,14 +12,11 @@ import java.util.Map;
  */
 public class SqlExecutionStatisticsCollector {
     private final Map<Integer, String> preparedStatements;
+    private final Project project;
     private String preparingStatement;
-
     private long startTime;
     private long executionTime;
-
     private String sql;
-
-    private final Project project;
 
     public SqlExecutionStatisticsCollector(Project project) {
         this.project = project;
@@ -120,6 +117,6 @@ public class SqlExecutionStatisticsCollector {
             return;
         }
 
-        this.sql = sql;
+        this.sql = sql.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll("\t", " ").replaceAll(" +", " ").trim();
     }
 }

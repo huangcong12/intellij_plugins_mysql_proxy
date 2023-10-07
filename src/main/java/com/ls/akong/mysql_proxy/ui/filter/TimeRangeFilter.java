@@ -1,6 +1,5 @@
 package com.ls.akong.mysql_proxy.ui.filter;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -12,11 +11,12 @@ import com.ls.akong.mysql_proxy.ui.BasePopupAction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class TimeRangeFilter extends AbstractChangesFilter {
 
     private ImmutableList<TimeRange> TimeRanges;
-    private Optional<TimeRange> value = Optional.absent();
+    private Optional<TimeRange> value = Optional.empty();
 
     private int timeRangeValue = 0;
 
