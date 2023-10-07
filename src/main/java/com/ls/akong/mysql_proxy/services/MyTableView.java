@@ -257,7 +257,7 @@ public final class MyTableView extends JPanel {
         private final int pageSize = 50; // 每页显示的数据条数
         private ArrayList<SqlLog> data;  // 数据集
         private String searchText = "";   // 搜索框
-        private long durationFilter = 0;// 执行时间
+        private String durationFilter = "";// 执行时间
         private String selectedTimeRange = "No Limit";  // 时间限制
         private String sqlType = "All"; // sql 类型限制
 
@@ -266,8 +266,8 @@ public final class MyTableView extends JPanel {
             refreshData();
         }
 
-        public void setDurationFilter(long durationFilter) {
-            this.durationFilter = durationFilter;
+        public void setDurationFilter(String durationFilter) {
+            this.durationFilter = durationFilter.trim();
         }
 
         private int getFirstItemId() {

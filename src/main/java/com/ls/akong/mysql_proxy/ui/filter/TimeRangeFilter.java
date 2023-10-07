@@ -15,7 +15,6 @@ public class TimeRangeFilter extends AbstractChangesFilter {
     private ImmutableList<TimeRange> TimeRanges;
     private Optional<TimeRange> value = Optional.absent();
 
-
     @Override
     public AnAction getAction(final Project project) {
         TimeRanges = ImmutableList.of(

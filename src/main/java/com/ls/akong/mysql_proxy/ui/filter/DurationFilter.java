@@ -11,6 +11,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.*;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.util.Consumer;
+import com.ls.akong.mysql_proxy.services.MyTableView;
 import com.ls.akong.mysql_proxy.ui.BasePopupAction;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,18 +19,21 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Objects;
 
 public class DurationFilter extends AbstractChangesFilter {
     private static final String POPUP_TEXT = String.format("Enter a number and press %s to search",
             KeymapUtil.getShortcutsText(CommonShortcuts.CTRL_ENTER.getShortcuts()));
-    private ImmutableList<DurationFilterType> DurationFilterTypes;
-    private JBPopupFactory jbPopupFactory;
+    private ImmutableList<DurationFilterType> durationFilterTypes;
+    private final JBPopupFactory jbPopupFactory;
     private JBPopup popup;
     private AnAction selectOkAction;
     private JTextArea selectFilterTypeTextArea;
     private Optional<DurationFilterType> value = Optional.absent();
 
     private String operation; // 新增操作类型字段
+
+    private String durationFilterValue = "";
 
     public DurationFilter() {
         this.jbPopupFactory = JBPopupFactory.getInstance();
@@ -38,13 +42,13 @@ public class DurationFilter extends AbstractChangesFilter {
 
     @Override
     public AnAction getAction(final Project project) {
-        DurationFilterTypes = ImmutableList.of(
-                new DurationFilterType("No Limit", "No Limit", 0),
-                new DurationFilterType("<=", "<=", 0),
-                new DurationFilterType(">=", "<=", 0),
-                new DurationFilterType("=", "=", 0)
+        durationFilterTypes = ImmutableList.of(
+                new DurationFilterType("No Limit", "No Limit"),
+                new DurationFilterType("<=", ""),
+                new DurationFilterType(">=", ""),
+                new DurationFilterType("=", "")
         );
-        value = Optional.of(DurationFilterTypes.get(0));
+        value = Optional.of(durationFilterTypes.get(0));
 
         return new DurationFilterPopupAction(project, "Duration Filter");
     }
@@ -62,12 +66,10 @@ public class DurationFilter extends AbstractChangesFilter {
     private static final class DurationFilterType {
         String label;
         String type;
-        int value;
 
-        private DurationFilterType(String label, String type, int value) {
+        private DurationFilterType(String label, String type) {
             this.label = label;
             this.type = type;
-            this.value = value;
         }
     }
 
@@ -106,11 +108,11 @@ public class DurationFilter extends AbstractChangesFilter {
 
             selectOkAction = buildOkAction();
 
-            for (final DurationFilterType filter : DurationFilterTypes) {
+            for (final DurationFilterType filter : durationFilterTypes) {
                 actionConsumer.consume(new DumbAwareAction(filter.label) {
                     @Override
                     public void actionPerformed(AnActionEvent e) {
-                        operation = filter.type;
+                        operation = filter.label;
 
                         // 如果是第一个 No Limit 不用处理后面的
                         if (isNotLimit(filter)) {
@@ -142,9 +144,22 @@ public class DurationFilter extends AbstractChangesFilter {
 
         private void change(DurationFilterType type) {
             value = Optional.of(type);
-            updateFilterValueLabel(operation + (!isNotLimit(type) ? " " + type.label + " ms" : ""));
+            String labelValue = operation + (!isNotLimit(type) ? " " + type.label + " ms" : "");
+            updateFilterValueLabel(labelValue);
             setChanged();
             notifyObservers(project);
+
+            // 判断是否有变化，如果有则更新
+            if (Objects.equals(durationFilterValue, labelValue)) {
+                return;
+            }
+            durationFilterValue = labelValue;
+
+            // 更新操作
+            MyTableView tableView = MyTableView.getInstance(project);
+            MyTableView.MyTableModel myTableModel = tableView.getTableModel();
+            myTableModel.setDurationFilter(isNotLimit(type) ? "" : operation + type.label);
+            tableView.refreshData();
         }
 
         private AnAction buildOkAction() {
@@ -156,7 +171,7 @@ public class DurationFilter extends AbstractChangesFilter {
                         return;
                     }
                     if (!Comparing.equal(newText, getFilterValueLabel().getText(), true)) {
-                        DurationFilterType type = new DurationFilterType(newText, newText, 0);
+                        DurationFilterType type = new DurationFilterType(newText, newText);
                         change(type);
                     }
                 }
