@@ -10,7 +10,6 @@ import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.JBSplitter;
-import com.intellij.ui.SearchTextField;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.content.ContentManager;
@@ -29,24 +28,6 @@ import javax.swing.*;
 public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, MysqlProxyServiceStateListener {
     private ToolWindow toolWindow;
 
-    /**
-     * 条件过滤
-     *
-     * @param project
-     * @param searchField
-     * @param timeRangeComboBox
-     * @param sqlTypeRangesBox
-     */
-    private static void conditionalFiltering(Project project, SearchTextField searchField, JFormattedTextField durationFilter, JComboBox<String> timeRangeComboBox, JComboBox<String> sqlTypeRangesBox) {
-        System.out.println(durationFilter.getText());
-        MyTableView tableView = MyTableView.getInstance(project);
-        MyTableView.MyTableModel myTableModel = tableView.getTableModel();
-        myTableModel.setSearchText(searchField.getText());
-        myTableModel.setDurationFilter(Integer.parseInt(durationFilter.getText()));
-        myTableModel.setSelectedTimeRange((String) timeRangeComboBox.getSelectedItem());
-        myTableModel.setSelectedSqlType((String) sqlTypeRangesBox.getSelectedItem());
-        tableView.refreshData();
-    }
 
     /**
      * 启动一个新 tool windows，编辑器启动完成后，自动调用。只运行一遍，ToolWindowFactory 规定必须要实现
