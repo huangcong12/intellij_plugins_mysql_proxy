@@ -2,9 +2,6 @@ package com.ls.akong.mysql_proxy.services;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.BrowserUtil;
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
@@ -14,7 +11,6 @@ import com.ls.akong.mysql_proxy.entity.SqlLog;
 import com.ls.akong.mysql_proxy.model.SqlLogFilterModel;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
 import com.ls.akong.mysql_proxy.ui.action.RecordingSwitchAction;
-import com.ls.akong.mysql_proxy.ui.action.ScrollToTopAction;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -22,7 +18,6 @@ import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Timer;
@@ -262,13 +257,17 @@ public final class MyTableView extends JPanel {
         private final int pageSize = 50; // 每页显示的数据条数
         private ArrayList<SqlLog> data;  // 数据集
         private String searchText = "";   // 搜索框
+        private long durationFilter = 0;// 执行时间
         private String selectedTimeRange = "No Limit";  // 时间限制
-
         private String sqlType = "All"; // sql 类型限制
 
         public MyTableModel(Project project) {
             this.project = project;
             refreshData();
+        }
+
+        public void setDurationFilter(long durationFilter) {
+            this.durationFilter = durationFilter;
         }
 
         private int getFirstItemId() {
@@ -299,7 +298,7 @@ public final class MyTableView extends JPanel {
          * 加载数据，首次启动会调用这个方法
          */
         public synchronized void refreshData() {
-            data = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, sqlType, 0, 0, pageSize);
+            data = SqlLogModel.queryLogs(project, searchText, durationFilter, selectedTimeRange, sqlType, 0, 0, pageSize);
         }
 
         /**
@@ -323,7 +322,7 @@ public final class MyTableView extends JPanel {
          * 加载数据，sql_log 有新增数据的时候，会调用这个方法
          */
         public synchronized int preRefreshData() {
-            ArrayList<SqlLog> newDataList = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, sqlType, 0, getFirstItemId(), pageSize);
+            ArrayList<SqlLog> newDataList = SqlLogModel.queryLogs(project, searchText, durationFilter, selectedTimeRange, sqlType, 0, getFirstItemId(), pageSize);
             if (newDataList.isEmpty()) {  // 兼容这些 SQL 已被添加到过滤表的场景
                 return 0;
             }
@@ -393,7 +392,7 @@ public final class MyTableView extends JPanel {
                 return;
             }
 
-            ArrayList<SqlLog> list = SqlLogModel.queryLogs(project, searchText, selectedTimeRange, sqlType, lastItemId, 0, pageSize);
+            ArrayList<SqlLog> list = SqlLogModel.queryLogs(project, searchText, durationFilter, selectedTimeRange, sqlType, lastItemId, 0, pageSize);
             if (list.size() == 0) {
                 return;
             }

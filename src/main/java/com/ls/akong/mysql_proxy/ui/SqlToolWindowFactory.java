@@ -18,11 +18,9 @@ import com.ls.akong.mysql_proxy.services.MySQLProxyHelperServer;
 import com.ls.akong.mysql_proxy.services.MyTableView;
 import com.ls.akong.mysql_proxy.services.MysqlProxyServiceStateListener;
 import com.ls.akong.mysql_proxy.ui.action.RecordingSwitchAction;
+import com.ls.akong.mysql_proxy.ui.filter.FilterModule;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.*;
 
 /**
  * ToolWindowFactory 是必须要实现的
@@ -39,10 +37,12 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
      * @param timeRangeComboBox
      * @param sqlTypeRangesBox
      */
-    private static void conditionalFiltering(Project project, SearchTextField searchField, JComboBox<String> timeRangeComboBox, JComboBox<String> sqlTypeRangesBox) {
+    private static void conditionalFiltering(Project project, SearchTextField searchField, JFormattedTextField durationFilter, JComboBox<String> timeRangeComboBox, JComboBox<String> sqlTypeRangesBox) {
+        System.out.println(durationFilter.getText());
         MyTableView tableView = MyTableView.getInstance(project);
         MyTableView.MyTableModel myTableModel = tableView.getTableModel();
         myTableModel.setSearchText(searchField.getText());
+        myTableModel.setDurationFilter(Integer.parseInt(durationFilter.getText()));
         myTableModel.setSelectedTimeRange((String) timeRangeComboBox.getSelectedItem());
         myTableModel.setSelectedSqlType((String) sqlTypeRangesBox.getSelectedItem());
         tableView.refreshData();
@@ -66,62 +66,11 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
         panel.setToolbar(leftToolbar.getComponent());
 
         // 2、List 数据
-        // 顶部 创建 SearchTextField
-        SearchTextField searchField = new SearchTextField();
-        // 创建一个时间段限制的 JComboBox
-        String[] timeRanges = {"No Limit", "Within 10s", "Within 1m", "Within 5m", "Within 10m"};
-        JComboBox<String> timeRangeComboBox = new com.intellij.openapi.ui.ComboBox<>(timeRanges);
-        // 创建一个 sql type 的 JComboBox
-        String[] sqlTypeRanges = {"All", "Select", "Insert", "Update", "Delete", "Other"};
-        JComboBox<String> sqlTypeRangesBox = new com.intellij.openapi.ui.ComboBox<>(sqlTypeRanges);
-
-        // 输入框监听
-        searchField.addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                reloadData();
-            }
-
-            private void reloadData() {
-                // 当插入文本时被调用
-                conditionalFiltering(project, searchField, timeRangeComboBox, sqlTypeRangesBox);
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                reloadData();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                reloadData();
-            }
-        });
-
-        // 添加 ActionListener 来监听选择事件
-        timeRangeComboBox.addActionListener(e -> {
-            // 在这里可以根据选择的时间段进行处理
-            conditionalFiltering(project, searchField, timeRangeComboBox, sqlTypeRangesBox);
-        });
-
-        // 添加 ActionListener 来监听选择事件
-        sqlTypeRangesBox.addActionListener(e -> {
-            // 在这里可以根据选择的时间段进行处理
-            conditionalFiltering(project, searchField, timeRangeComboBox, sqlTypeRangesBox);
-        });
-
         // 创建一个新的 JPanel，包含 ActionToolbar 和 SearchTextField
-        JPanel topToolbarPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        topToolbarPanel.add(new JLabel("Filter:"));
-        topToolbarPanel.add(searchField);
-        topToolbarPanel.add(new JLabel("Time Range:"));
-        topToolbarPanel.add(timeRangeComboBox);
-        topToolbarPanel.add(new JLabel("SQL Type:"));
-        topToolbarPanel.add(sqlTypeRangesBox);
+        JBSplitter sqlListSplitter = new JBSplitter(true, 0.06f);
 
-        JBSplitter sqlListSplitter = new JBSplitter(true, 0.01f);
-        // 顶部按钮
-        sqlListSplitter.setFirstComponent(topToolbarPanel);
+        // 顶部条件搜索按钮组
+        sqlListSplitter.setFirstComponent(FilterModule.createToolbar(project));
         // 下部 table view
         MyTableView myTableView = MyTableView.getInstance(project);
         sqlListSplitter.setSecondComponent(myTableView);

@@ -102,12 +102,15 @@ public class SqlLogModel {
      * @param pageSize
      * @return
      */
-    public static ArrayList<SqlLog> queryLogs(Project project, String searchText, String selectedTimeRange, String sqlType, int maxLimitId, int minLimitId, int pageSize) {
+    public static ArrayList<SqlLog> queryLogs(Project project, String searchText, long durationFilter, String selectedTimeRange, String sqlType, int maxLimitId, int minLimitId, int pageSize) {
         ArrayList<SqlLog> logEntries = new ArrayList<>();
         String querySQL = "SELECT * FROM " + SqlLog.getTableName() + " WHERE 1 ";
         // 条件搜索
         if (!Objects.equals(searchText, "") && searchText.length() > 0) {
             querySQL += " AND sql LIKE '%" + searchText + "%'";
+        }
+        if (durationFilter > 0) {
+            querySQL += " AND execution_time>=" + durationFilter;
         }
 
         // Time range conditions.如果有时间段条件搜索，则查询所有，要不然会有过时间了，还在的 bug
