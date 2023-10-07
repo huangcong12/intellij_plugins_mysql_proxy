@@ -102,9 +102,7 @@ public final class MyTableView extends JPanel {
         // 返回顶部
         Icon scrollToTopIcon = IconLoader.getIcon("/icons/top.svg", RecordingSwitchAction.class);
         JMenuItem scrollToTop = new JMenuItem("Scroll To Top", scrollToTopIcon);
-        scrollToTop.addActionListener(e -> {
-            this.scrollToTop();
-        });
+        scrollToTop.addActionListener(e -> this.scrollToTop());
 
         popupMenu.add(copyItem);
         popupMenu.addSeparator();
@@ -254,7 +252,7 @@ public final class MyTableView extends JPanel {
     // 自定义 TableModel 类
     public static class MyTableModel extends AbstractTableModel {
         private final Project project;
-        private final int pageSize = 50; // 每页显示的数据条数
+        private final int pageSize = 100; // 每页显示的数据条数
         private ArrayList<SqlLog> data;  // 数据集
         private String searchText = "";   // 搜索框
         private String durationFilter = "";// 执行时间
@@ -329,7 +327,7 @@ public final class MyTableView extends JPanel {
 
             int newDataListCount = newDataList.size();
             // 不是时间搜索的，才采用补数据的方式
-            if (Objects.equals(selectedTimeRange, "No Limit")) {
+            if (selectedTimeRange == 0) {
                 data.addAll(0, newDataList);
             } else {
                 // 时间搜索，直接搜所有，因为数据有时效性
@@ -398,7 +396,7 @@ public final class MyTableView extends JPanel {
             }
 
             // 时间段搜索的话，不分页
-            if (!Objects.equals(selectedTimeRange, "No Limit")) {
+            if (selectedTimeRange > 0) {
                 data = list;
                 return;
             }
