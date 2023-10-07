@@ -23,7 +23,7 @@ public class TimeRangeFilter extends AbstractChangesFilter {
     @Override
     public AnAction getAction(final Project project) {
         TimeRanges = ImmutableList.of(
-                new TimeRange("No Limit", 0),
+                new TimeRange("All", 0),
                 new TimeRange("Within 10s", 10000),
                 new TimeRange("Within 1m", 60000),
                 new TimeRange("Within 5m", 300000),
