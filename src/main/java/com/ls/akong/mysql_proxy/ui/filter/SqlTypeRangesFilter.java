@@ -6,9 +6,11 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.Consumer;
+import com.ls.akong.mysql_proxy.services.MyTableView;
 import com.ls.akong.mysql_proxy.ui.BasePopupAction;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class SqlTypeRangesFilter extends AbstractChangesFilter {
@@ -16,15 +18,17 @@ public class SqlTypeRangesFilter extends AbstractChangesFilter {
     private ImmutableList<SqlTypeRange> sqlTypeRanges;
     private Optional<SqlTypeRange> value = Optional.empty();
 
+    private String sqlTypeRangesValue = "All";
+
     @Override
     public AnAction getAction(final Project project) {
         sqlTypeRanges = ImmutableList.of(
-                new SqlTypeRange("All", "All"),
-                new SqlTypeRange("Select", "Select"),
-                new SqlTypeRange("Insert", "Insert"),
-                new SqlTypeRange("Update", "Update"),
-                new SqlTypeRange("Delete", "Delete"),
-                new SqlTypeRange("Other", "Other")
+                new SqlTypeRange("All"),
+                new SqlTypeRange("Select"),
+                new SqlTypeRange("Insert"),
+                new SqlTypeRange("Update"),
+                new SqlTypeRange("Delete"),
+                new SqlTypeRange("Other")
         );
         value = Optional.of(sqlTypeRanges.get(0));
 
@@ -39,11 +43,9 @@ public class SqlTypeRangesFilter extends AbstractChangesFilter {
 
     private static final class SqlTypeRange {
         String label;
-        String type;
 
-        private SqlTypeRange(String label, String type) {
+        private SqlTypeRange(String label) {
             this.label = label;
-            this.type = type;
         }
     }
 
@@ -73,6 +75,17 @@ public class SqlTypeRangesFilter extends AbstractChangesFilter {
             updateFilterValueLabel(sqlTypeRange.label);
             setChanged();
             notifyObservers(project);
+
+            // 判断是否有变动
+            if (Objects.equals(sqlTypeRangesValue, sqlTypeRange.label)) {
+                return;
+            }
+            sqlTypeRangesValue = sqlTypeRange.label;
+
+            MyTableView tableView = MyTableView.getInstance(project);
+            MyTableView.MyTableModel myTableModel = tableView.getTableModel();
+            myTableModel.setSelectedSqlType(sqlTypeRange.label);
+            tableView.refreshData();
         }
     }
 }
