@@ -258,7 +258,7 @@ public final class MyTableView extends JPanel {
         private ArrayList<SqlLog> data;  // 数据集
         private String searchText = "";   // 搜索框
         private String durationFilter = "";// 执行时间
-        private String selectedTimeRange = "No Limit";  // 时间限制
+        private int selectedTimeRange = 0;  // 最近执行时间条件搜索
         private String sqlType = "All"; // sql 类型限制
 
         public MyTableModel(Project project) {
@@ -286,7 +286,7 @@ public final class MyTableView extends JPanel {
             this.searchText = searchText;
         }
 
-        public void setSelectedTimeRange(String selectedTimeRange) {
+        public void setSelectedTimeRange(int selectedTimeRange) {
             this.selectedTimeRange = selectedTimeRange;
         }
 

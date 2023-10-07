@@ -82,6 +82,7 @@ public class SqlTypeRangesFilter extends AbstractChangesFilter {
             }
             sqlTypeRangesValue = sqlTypeRange.label;
 
+            // 更新 TableView
             MyTableView tableView = MyTableView.getInstance(project);
             MyTableView.MyTableModel myTableModel = tableView.getTableModel();
             myTableModel.setSelectedSqlType(sqlTypeRange.label);

@@ -7,22 +7,27 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.Consumer;
+import com.ls.akong.mysql_proxy.services.MyTableView;
 import com.ls.akong.mysql_proxy.ui.BasePopupAction;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 public class TimeRangeFilter extends AbstractChangesFilter {
 
     private ImmutableList<TimeRange> TimeRanges;
     private Optional<TimeRange> value = Optional.absent();
 
+    private int timeRangeValue = 0;
+
     @Override
     public AnAction getAction(final Project project) {
         TimeRanges = ImmutableList.of(
-                new TimeRange("No Limit", "0"),
-                new TimeRange("Within 10s", "10"),
-                new TimeRange("Within 1m", "60"),
-                new TimeRange("Within 5m", "300"),
-                new TimeRange("Within 10m", "600")
+                new TimeRange("No Limit", 0),
+                new TimeRange("Within 10s", 10000),
+                new TimeRange("Within 1m", 60000),
+                new TimeRange("Within 5m", 300000),
+                new TimeRange("Within 10m", 600000)
         );
         value = Optional.of(TimeRanges.get(0));
 
@@ -38,11 +43,11 @@ public class TimeRangeFilter extends AbstractChangesFilter {
 
     private static final class TimeRange {
         String label;
-        String type;
+        int value;
 
-        private TimeRange(String label, String type) {
+        private TimeRange(String label, int value) {
             this.label = label;
-            this.type = type;
+            this.value = value;
         }
     }
 
@@ -73,6 +78,18 @@ public class TimeRangeFilter extends AbstractChangesFilter {
             updateFilterValueLabel(timeRanges.label);
             setChanged();
             notifyObservers(project);
+
+            // 判断是否有变动
+            if (Objects.equals(timeRangeValue, timeRanges.value)) {
+                return;
+            }
+            timeRangeValue = timeRanges.value;
+
+            // 更新 TableView
+            MyTableView tableView = MyTableView.getInstance(project);
+            MyTableView.MyTableModel myTableModel = tableView.getTableModel();
+            myTableModel.setSelectedTimeRange(timeRangeValue);
+            tableView.refreshData();
         }
     }
 }

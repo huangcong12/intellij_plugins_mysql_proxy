@@ -102,7 +102,7 @@ public class SqlLogModel {
      * @param pageSize
      * @return
      */
-    public static ArrayList<SqlLog> queryLogs(Project project, String searchText, String durationFilter, String selectedTimeRange, String sqlType, int maxLimitId, int minLimitId, int pageSize) {
+    public static ArrayList<SqlLog> queryLogs(Project project, String searchText, String durationFilter, int selectedTimeRange, String sqlType, int maxLimitId, int minLimitId, int pageSize) {
         ArrayList<SqlLog> logEntries = new ArrayList<>();
         String querySQL = "SELECT * FROM " + SqlLog.getTableName() + " WHERE 1 ";
         // 条件搜索
@@ -114,31 +114,10 @@ public class SqlLogModel {
         }
 
         // Time range conditions.如果有时间段条件搜索，则查询所有，要不然会有过时间了，还在的 bug
-        if (!selectedTimeRange.equals("No Limit")) {
-            long timeLimitMillis;
-            switch (selectedTimeRange) {
-                case "Within 10s":
-                    timeLimitMillis = 10000; // 10 seconds in milliseconds
-                    break;
-                case "Within 1m":
-                    timeLimitMillis = 60000; // 1 minute in milliseconds
-                    break;
-                case "Within 5m":
-                    timeLimitMillis = 300000; // 5 minute in milliseconds
-                    break;
-                case "Within 10m":
-                    timeLimitMillis = 600000; // 10 minute in milliseconds
-                    break;
-                default:
-                    timeLimitMillis = 0; // No time limit
-                    break;
-            }
-
+        if (selectedTimeRange > 0) {
             // Append the time range condition to the query
-            if (timeLimitMillis > 0) {
-                long startTimeMillis = System.currentTimeMillis() - timeLimitMillis;
-                querySQL += " AND created_at >= " + startTimeMillis;
-            }
+            long startTimeMillis = System.currentTimeMillis() - selectedTimeRange;
+            querySQL += " AND created_at >= " + startTimeMillis;
         } else {
             if (maxLimitId > 0) {           // 分页
                 querySQL += " AND id<" + maxLimitId;
@@ -150,10 +129,10 @@ public class SqlLogModel {
         if (!Objects.equals(sqlType, "All")) {
             switch (sqlType) {
                 case "Other":
-                    querySQL += " AND (`sql` NOT LIKE '%SELECT%' AND `sql` NOT LIKE '%INSERT%' AND `sql` NOT LIKE '%UPDATE%' AND `sql` NOT LIKE '%DELETE%') ";
+                    querySQL += " AND (LOWER(sql) NOT LIKE '%select%' AND LOWER(sql) NOT LIKE '%insert%' AND LOWER(sql) NOT LIKE '%update%' AND LOWER(sql) NOT LIKE '%delete%') ";
                     break;
                 default:
-                    querySQL += " AND (`sql` LIKE '%" + sqlType.toUpperCase() + "%') ";
+                    querySQL += " AND (LOWER(sql) LIKE '%" + sqlType.toLowerCase() + "%') ";
                     break;
             }
         }
@@ -161,7 +140,7 @@ public class SqlLogModel {
         querySQL += " AND sql NOT IN (SELECT sql FROM " + SqlLogFilter.getTableName() + ") ORDER BY id DESC";
 
         // 非前增、时间搜索的，才用分页。但是不做分页，也要限制最大量，防止卡死
-        if (minLimitId > 0 || !selectedTimeRange.equals("No Limit")) {
+        if (minLimitId > 0 || selectedTimeRange > 0) {
             pageSize = MAX_PAGE_SIZE;
         }
         querySQL += " LIMIT 0," + pageSize;
