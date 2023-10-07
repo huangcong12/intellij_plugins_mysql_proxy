@@ -20,6 +20,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.ui.SearchFieldAction;
+import com.ls.akong.mysql_proxy.services.MyTableView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,10 +45,13 @@ public class FulltextFilter extends AbstractChangesFilter {
                 if (!isNewValue(newValue)) {
                     return;
                 }
-
-                System.out.println(newValue);
-
                 value = newValue;
+
+                // 条件搜索
+                MyTableView tableView = MyTableView.getInstance(project);
+                MyTableView.MyTableModel myTableModel = tableView.getTableModel();
+                myTableModel.setSearchText(value);
+                tableView.refreshData();
             }
 
             private boolean isNewValue(String newValue) {
