@@ -32,7 +32,10 @@
             <li> Frameworks using GORM (Tested with go-admin)</li>
         </ul>
 
-        <p> Java (To be tested):</p>
+        <p> Java:</p>
+        <ul>
+            <li> Frameworks using Spring Mybatis</li>
+        </ul>
 
         <p> Python:</p>
         <ul>
