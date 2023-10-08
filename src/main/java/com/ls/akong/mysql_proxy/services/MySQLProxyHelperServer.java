@@ -2,8 +2,10 @@ package com.ls.akong.mysql_proxy.services;
 
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.ls.akong.mysql_proxy.ui.MysqlProxyConfigurable;
 import com.ls.akong.mysql_proxy.util.MySQLProxy;
 import io.vertx.core.Vertx;
 
@@ -38,17 +40,20 @@ public final class MySQLProxyHelperServer {
         // Mysql Server Ip 校验
         if (Objects.equals(state.originalMysqlIp, "")) {
             Messages.showErrorDialog("Run parameter exception. Please go to the Configuration Management page, fill in the 'Remote MySQL Server IP Address' field, and try again.", "Invalid Run Configuration");
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, MysqlProxyConfigurable.class);
             return;
         }
         if (Objects.equals(state.originalMysqlPort, "")) {
             Messages.showErrorDialog("Run parameter exception. Please go to the Configuration Management page, fill in the 'Remote MySQL Server Port' field, and try again.", "Invalid Run Configuration");
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, MysqlProxyConfigurable.class);
             return;
         }
 
         // 监听的端口校验
-        int proxyPort = Integer.parseInt(state.listeningPort);
+        int proxyPort = Objects.equals(state.listeningPort, "") ? 0 : Integer.parseInt(state.listeningPort);
         if (proxyPort == 0) {
             Messages.showErrorDialog("Run parameter exception. Please go to the Configuration Management page, fill in the 'Listening port' field, and try again.", "Invalid Run Configuration");
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, MysqlProxyConfigurable.class);
             return;
         }
 
@@ -81,7 +86,7 @@ public final class MySQLProxyHelperServer {
      */
     public void stopServer() {
         vertx.close();
-        
+
         isRunning = false;
         this.notifyListeners();
     }
