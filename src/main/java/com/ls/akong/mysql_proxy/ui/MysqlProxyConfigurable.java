@@ -60,7 +60,9 @@ public class MysqlProxyConfigurable implements Configurable {
         settings.getState().startWithEditor = configurableForm.getProxyServerStartWithCheckBox();
 
         // 如果修改了，询问是否重启
-        if (isModified) {
+        if (isModified && !Objects.equals(settings.getState().originalMysqlIp, "")
+                && !Objects.equals(settings.getState().originalMysqlPort, "")
+                && !Objects.equals(settings.getState().listeningPort, "")) {
             int answer = Messages.showYesNoDialog("Restart proxy service?", "Confirmation", Messages.getQuestionIcon());
 
             if (answer == Messages.YES) {
