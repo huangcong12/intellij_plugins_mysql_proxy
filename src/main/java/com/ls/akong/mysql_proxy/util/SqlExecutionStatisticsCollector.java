@@ -3,6 +3,7 @@ package com.ls.akong.mysql_proxy.util;
 import com.intellij.openapi.project.Project;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
 import com.ls.akong.mysql_proxy.services.MyTableView;
+import com.ls.akong.mysql_proxy.services.MysqlProxySettings;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -96,11 +97,15 @@ public class SqlExecutionStatisticsCollector {
         long endTime = System.currentTimeMillis();
         executionTime = endTime - startTime;
 
-        // 记录 sql 到表里
-        SqlLogModel.insertLog(project, sql, executionTime);
+        // 检查是否开启记录 sql
+        MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(project);
+        if (recordingSwitch.isMonitorEnabled()) {
+            // 记录 sql 到表里
+            SqlLogModel.insertLog(project, sql, executionTime);
 
-        MyTableView myTableView = MyTableView.getInstance(project);
-        myTableView.updateData();
+            MyTableView myTableView = MyTableView.getInstance(project);
+            myTableView.updateData();
+        }
 
         // 重置
         startTime = 0;
