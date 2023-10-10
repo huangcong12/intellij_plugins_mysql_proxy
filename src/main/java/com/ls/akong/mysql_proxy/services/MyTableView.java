@@ -20,6 +20,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Timer;
 import java.util.*;
 
@@ -86,6 +88,25 @@ public final class MyTableView extends JPanel {
             }
         });
 
+        // phind 查询分析
+        JMenuItem optimizeWithPhind = new JMenuItem("Optimize with Phind(Free GPT 3.5)");    // Icons.ADD_ICON
+        optimizeWithPhind.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow != -1) {
+                Object id = table.getModel().getValueAt(selectedRow, 0); // 假设 id 是表的第一列
+                String sql = tableModel.getSqlById((Integer) id);
+
+                // 获取默认的系统区域设置
+                Locale defaultLocale = Locale.getDefault();
+                String systemLanguage = defaultLocale.getLanguage();
+
+                String question = "I have an SQL query \n```\n" + sql + "\n```\n could you please check if there's any room for optimization?" + (systemLanguage.equals("") ? "" : "Please answer me in " + systemLanguage);
+
+                String url = "https://www.phind.com/agent?q=" + URLEncoder.encode(question, StandardCharsets.UTF_8) + "&source=searchbox";
+                BrowserUtil.browse(url);
+            }
+        });
+
         // EverSQL 查询分析
         JMenuItem optimizeWithEverSql = new JMenuItem("Optimize with EverSQL (Premium)");    // Icons.ADD_ICON
         optimizeWithEverSql.addActionListener(e -> {
@@ -106,6 +127,7 @@ public final class MyTableView extends JPanel {
 
         popupMenu.add(copyItem);
         popupMenu.addSeparator();
+        popupMenu.add(optimizeWithPhind);
         popupMenu.add(optimizeWithEverSql);
         popupMenu.addSeparator();
         popupMenu.add(ignoreSqlLogItem);
