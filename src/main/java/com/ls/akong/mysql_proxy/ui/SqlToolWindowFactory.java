@@ -48,7 +48,7 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
 
         // 2、List 数据
         // 创建一个新的 JPanel，包含 ActionToolbar 和 SearchTextField
-        JBSplitter sqlListSplitter = new JBSplitter(true, 0.045f);
+        JBSplitter sqlListSplitter = new JBSplitter(true, 0.05f);
 
         // 顶部条件搜索按钮组
         sqlListSplitter.setFirstComponent(FilterModule.createToolbar(project));
