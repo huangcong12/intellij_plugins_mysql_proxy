@@ -87,6 +87,12 @@
     <h2>Important Note:</h2>
     You can report exception-issues directly from your IDE. Please add at least a comment what you have done when it occurred / how you can reproduce it. It would be even better when add an email address so I can contact you in case of questions.
 
+    <h2> 1.0.8 </h2>
+    <h3>Features</h3>
+    <ul>
+        <li>右键菜单增加：Optimize with OpenAI (Free GPT-3.5, Login Required)、Optimize with Phind (Free GPT 3.5)</li>
+        <li>SQL 执行时间大于 1 s，TableView 的 Duration 列改成黄色背景，方便发现慢查询</li>
+    </ul>
     <h2> 1.0.7 </h2>
     <h3>Features</h3>
     <ul>
