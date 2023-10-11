@@ -11,6 +11,7 @@ import com.ls.akong.mysql_proxy.entity.SqlLog;
 import com.ls.akong.mysql_proxy.model.SqlLogFilterModel;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
 import com.ls.akong.mysql_proxy.ui.action.RecordingSwitchAction;
+import com.ls.akong.mysql_proxy.util.CustomTableCellRenderer;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -200,6 +201,8 @@ public final class MyTableView extends JPanel {
                 tableModel.nextPage();
             }
         });
+
+        table.setDefaultRenderer(Object.class, new CustomTableCellRenderer());
     }
 
     public static MyTableView getInstance(Project project) {
