@@ -88,8 +88,27 @@ public final class MyTableView extends JPanel {
             }
         });
 
+        // openai 查询分析
+        JMenuItem optimizeWithOpenAI = new JMenuItem("Optimize with OpenAI (Free GPT-3.5, Login Required)");    // Icons.ADD_ICON
+        optimizeWithOpenAI.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow != -1) {
+                Object id = table.getModel().getValueAt(selectedRow, 0); // 假设 id 是表的第一列
+                String sql = tableModel.getSqlById((Integer) id);
+
+                // 获取默认的系统区域设置
+                Locale defaultLocale = Locale.getDefault();
+                String systemLanguage = defaultLocale.getLanguage();
+
+                String question = "I have an SQL query \n```\n" + sql + "\n```\n could you please check if there's any room for optimization?" + (systemLanguage.equals("") ? "" : "Please answer me in " + systemLanguage);
+
+                String url = "https://chat.openai.com/?m=" + URLEncoder.encode(question, StandardCharsets.UTF_8);
+                BrowserUtil.browse(url);
+            }
+        });
+
         // phind 查询分析
-        JMenuItem optimizeWithPhind = new JMenuItem("Optimize with Phind(Free GPT 3.5)");    // Icons.ADD_ICON
+        JMenuItem optimizeWithPhind = new JMenuItem("Optimize with Phind (Free GPT 3.5)");    // Icons.ADD_ICON
         optimizeWithPhind.addActionListener(e -> {
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
@@ -127,6 +146,7 @@ public final class MyTableView extends JPanel {
 
         popupMenu.add(copyItem);
         popupMenu.addSeparator();
+        popupMenu.add(optimizeWithOpenAI);
         popupMenu.add(optimizeWithPhind);
         popupMenu.add(optimizeWithEverSql);
         popupMenu.addSeparator();
