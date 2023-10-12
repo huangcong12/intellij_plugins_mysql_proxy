@@ -137,7 +137,7 @@ public class SqlLogModel {
             }
         }
 
-        querySQL += " AND sql NOT IN (SELECT sql FROM " + SqlLogFilter.getTableName() + ") ORDER BY id DESC";
+        querySQL += " AND signature NOT IN (SELECT signature FROM " + SqlLogFilter.getTableName() + ") ORDER BY id DESC";
 
         // 非前增、时间搜索的，才用分页。但是不做分页，也要限制最大量，防止卡死
         if (minLimitId > 0 || selectedTimeRange > 0) {
@@ -147,14 +147,15 @@ public class SqlLogModel {
         logger.info("sql: " + querySQL);
 
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
-        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(querySQL);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
+        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(querySQL); ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String sql = resultSet.getString("sql");
                 long createdAt = resultSet.getLong("created_at");
                 long executionTime = resultSet.getLong("execution_time");
-                logEntries.add(new SqlLog(id, sql, createdAt, executionTime));
+                String signature = resultSet.getString("signature");
+
+                logEntries.add(new SqlLog(id, sql, createdAt, executionTime, signature));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -176,8 +177,9 @@ public class SqlLogModel {
                     String sql = resultSet.getString("sql");
                     long createdAt = resultSet.getLong("created_at");
                     long executionTime = resultSet.getLong("execution_time");
+                    String signature = resultSet.getString("signature");
 
-                    return new SqlLog(recordId, sql, createdAt, executionTime); // 创建并返回 SqlLog 对象
+                    return new SqlLog(recordId, sql, createdAt, executionTime, signature); // 创建并返回 SqlLog 对象
                 }
             }
         } catch (SQLException e) {
@@ -203,7 +205,7 @@ public class SqlLogModel {
      * 建表 SQL
      */
     public static String getCreateTableSql() {
-        return "CREATE TABLE IF NOT EXISTS " + SqlLog.getTableName() + " (id INT AUTO_INCREMENT PRIMARY KEY, sql CLOB,execution_time BIGINT, created_at BIGINT)";
+        return "CREATE TABLE IF NOT EXISTS " + SqlLog.getTableName() + " (id INT AUTO_INCREMENT PRIMARY KEY, sql CLOB,execution_time BIGINT,signature char(16), created_at BIGINT)";
     }
 
     public static void deleteDataById(Project project, int id) {
@@ -226,15 +228,16 @@ public class SqlLogModel {
      * @param executionTime
      * @return
      */
-    public static int insertLog(Project project, String sql, long executionTime) {
-        String insertSQL = "INSERT INTO " + SqlLog.getTableName() + " (sql, execution_time, created_at) VALUES (?, ?, ?)";
+    public static int insertLog(Project project, String sql, long executionTime, String signature) {
+        String insertSQL = "INSERT INTO " + SqlLog.getTableName() + " (sql,execution_time,signature,created_at) VALUES (?,?,?,?)";
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
 
         try {
             PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(insertSQL, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, sql);
             preparedStatement.setLong(2, executionTime);
-            preparedStatement.setLong(3, System.currentTimeMillis());
+            preparedStatement.setString(3, signature);
+            preparedStatement.setLong(4, System.currentTimeMillis());
             preparedStatement.executeUpdate();
 
             // 获取生成的键

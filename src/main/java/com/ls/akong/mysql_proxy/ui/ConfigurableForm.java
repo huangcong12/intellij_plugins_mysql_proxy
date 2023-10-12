@@ -127,7 +127,7 @@ public class ConfigurableForm {
         for (SqlLogFilter sqlLogFilter : sqlLogFilterList) {
             Vector<Object> rowData = new Vector<>();
             rowData.add(sqlLogFilter.getId());
-            rowData.add(sqlLogFilter.getSql());
+            rowData.add(sqlLogFilter.getSqlFinger());
 
             tableModel.addRow(rowData);
         }

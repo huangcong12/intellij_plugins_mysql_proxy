@@ -1,28 +1,32 @@
 package com.ls.akong.mysql_proxy.util;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SQLFingerprintGenerator {
     public static String generateFingerprint(String sql) {
-        // Remove comments (both single-line and multi-line)
+        sql = removeComments(sql);
+        sql = replaceNumericLiterals(sql);
+        sql = replaceStringLiterals(sql);
+        sql = replaceValueLists(sql);
+        sql = convertToLowercase(sql);
+        sql = removeExtraSpaces(sql);
+
+        return sql;
+    }
+
+    private static String removeComments(String sql) {
         sql = sql.replaceAll("/\\*.*?\\*/", ""); // Remove multi-line comments
         sql = sql.replaceAll("--.*?\\n", "");   // Remove single-line comments
+        sql = sql.replaceAll("#.*?\\n", "");    // Remove single-line comments starting with #
 
-        // Replace numeric literals with '?'
+        return sql;
+    }
+
+    private static String replaceNumericLiterals(String sql) {
         sql = sql.replaceAll("-?\\d+(\\.\\d+)?", "?");
-
-        // Replace string literals with '?'
-        sql = replaceStringLiterals(sql);
-
-        // Replace value lists (e.g., IN clause) with '?'
-        sql = replaceValueLists(sql);
-
-        // Convert the SQL query to lowercase
-        sql = sql.toLowerCase();
-
-        // Remove extra spaces and trim
-        sql = sql.replaceAll("\\s+", " ").trim();
 
         return sql;
     }
@@ -33,6 +37,8 @@ public class SQLFingerprintGenerator {
 
         StringBuffer result = new StringBuffer();
         while (matcher.find()) {
+            String literal = matcher.group();
+            literal = literal.replaceAll("'", "''"); // Escape single quotes
             matcher.appendReplacement(result, "?");
         }
         matcher.appendTail(result);
@@ -41,12 +47,12 @@ public class SQLFingerprintGenerator {
     }
 
     private static String replaceValueLists(String sql) {
-        Pattern pattern = Pattern.compile("\\([^)]*\\)");
+        Pattern pattern = Pattern.compile("\\([^()]*\\)");
         Matcher matcher = pattern.matcher(sql);
 
         StringBuffer result = new StringBuffer();
         while (matcher.find()) {
-//            String valueList = matcher.group();
+            String valueList = matcher.group();
             String replacement = "?"; // Replace the entire value list with a single '?'
             matcher.appendReplacement(result, replacement);
         }
@@ -55,4 +61,47 @@ public class SQLFingerprintGenerator {
         return result.toString();
     }
 
+    private static String convertToLowercase(String sql) {
+        return sql.toLowerCase();
+    }
+
+    private static String removeExtraSpaces(String sql) {
+        sql = sql.replaceAll("\\s+", " ").trim();
+
+        return sql;
+    }
+
+    /**
+     * md5 sql 然后取右 16 位，参考 soar 的，soar 给的解释是：
+     * Id returns the right-most 16 characters of the MD5 checksum of fingerprint.Query IDs are the shortest way to uniquely identify queries.
+     *
+     * @param fingerprint
+     * @return
+     */
+    public static String getSignature(String fingerprint) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(fingerprint.getBytes());
+            byte[] digest = md.digest();
+
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : digest) {
+                String hex = Integer.toHexString(0xFF & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+
+            String hash = hexString.toString().toUpperCase();
+            return hash.substring(16, 32);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null; // Handle the exception appropriately
+        }
+    }
+
+    public static String getSignatureBySql(String sql) {
+        return getSignature(generateFingerprint(sql));
+    }
 }

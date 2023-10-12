@@ -100,8 +100,10 @@ public class SqlExecutionStatisticsCollector {
         // 检查是否开启记录 sql
         MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(project);
         if (recordingSwitch.isMonitorEnabled()) {
+            String signature = SQLFingerprintGenerator.getSignatureBySql(sql);
+
             // 记录 sql 到表里
-            SqlLogModel.insertLog(project, sql, executionTime);
+            SqlLogModel.insertLog(project, sql, executionTime, signature);
 
             MyTableView myTableView = MyTableView.getInstance(project);
             myTableView.updateData();
