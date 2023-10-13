@@ -173,6 +173,9 @@
                 id="com.kong.mycompany.mysql_proxy.MysqlProxyConfigurable"
                 displayName="MySQL Proxy Settings"
                 instance="com.ls.akong.mysql_proxy.ui.MysqlProxyConfigurable"/>
+
+        <notificationGroup id="MySQLProxy Notification Group"
+                           displayType="BALLOON"/>
     </extensions>
 
     <actions>
