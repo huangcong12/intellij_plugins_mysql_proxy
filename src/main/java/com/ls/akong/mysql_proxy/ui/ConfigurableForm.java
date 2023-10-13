@@ -31,13 +31,17 @@ public class ConfigurableForm {
     private JButton newButton;
     private JButton removeButton;
     private JButton editButton;
+    private JTextField database;
+    private JTextField username;
+    private JPasswordField password1;
+    private JTextPane theDatabaseUsernameAndTextPane;
 
     public ConfigurableForm(Project project) {
 
         // 创建表格模型
         tableModel = new DefaultTableModel();
 
-        initTestConnectonButton();
+        initTestConnectButton();
 
         // 新增 sql filter 按钮
         initSqlFilterButton(newButton);
@@ -157,7 +161,7 @@ public class ConfigurableForm {
         });
     }
 
-    private void initTestConnectonButton() {
+    private void initTestConnectButton() {
         // "Test Connection" button 监听
         testConnectionButton.addActionListener(e -> {
             // 处理按钮点击事件的逻辑
@@ -180,6 +184,31 @@ public class ConfigurableForm {
     public void setTargetMysqlIpTextField(String targetMysqlIpText) {
         this.targetMysqlIpTextField.setText(targetMysqlIpText);
     }
+
+    public String getDatabase() {
+        return database.getText();
+    }
+
+    public void setDatabase(String database) {
+        this.database.setText(database);
+    }
+
+    public String getUsername() {
+        return username.getText();
+    }
+
+    public void setUsername(String username) {
+        this.username.setText(username);
+    }
+
+    public String getPassword() {
+        return password1.getText();
+    }
+
+    public void setPassword(String password) {
+        this.password1.setText(password);
+    }
+
 
     public String getTargetMysqlPortTextField() {
         return targetMysqlPortTextField.getText();
