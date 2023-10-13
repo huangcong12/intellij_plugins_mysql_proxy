@@ -12,6 +12,7 @@ import com.ls.akong.mysql_proxy.model.SqlLogFilterModel;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
 import com.ls.akong.mysql_proxy.ui.action.RecordingSwitchAction;
 import com.ls.akong.mysql_proxy.util.CustomTableCellRenderer;
+import com.ls.akong.mysql_proxy.util.GptQuestionGenerator;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -23,8 +24,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Timer;
-import java.util.*;
+import java.util.TimerTask;
 
 
 @Service(Service.Level.PROJECT)
@@ -97,13 +100,8 @@ public final class MyTableView extends JPanel {
                 Object id = table.getModel().getValueAt(selectedRow, 0); // 假设 id 是表的第一列
                 String sql = tableModel.getSqlById((Integer) id);
 
-                // 获取默认的系统区域设置
-                Locale defaultLocale = Locale.getDefault();
-                String systemLanguage = defaultLocale.getLanguage();
-
-                String question = "I have an SQL query \n```\n" + sql + "\n```\n could you please check if there's any room for optimization?" + (systemLanguage.equals("") ? "" : "Please answer me in " + systemLanguage);
-
-                String url = "https://chat.openai.com/?m=" + URLEncoder.encode(question, StandardCharsets.UTF_8);
+                GptQuestionGenerator gptQuestionGenerator = new GptQuestionGenerator(project, sql);
+                String url = "https://chat.openai.com/?m=" + URLEncoder.encode(gptQuestionGenerator.getQuestion(), StandardCharsets.UTF_8);
                 BrowserUtil.browse(url);
             }
         });
@@ -116,13 +114,8 @@ public final class MyTableView extends JPanel {
                 Object id = table.getModel().getValueAt(selectedRow, 0); // 假设 id 是表的第一列
                 String sql = tableModel.getSqlById((Integer) id);
 
-                // 获取默认的系统区域设置
-                Locale defaultLocale = Locale.getDefault();
-                String systemLanguage = defaultLocale.getLanguage();
-
-                String question = "I have an SQL query \n```\n" + sql + "\n```\n could you please check if there's any room for optimization?" + (systemLanguage.equals("") ? "" : "Please answer me in " + systemLanguage);
-
-                String url = "https://www.phind.com/agent?q=" + URLEncoder.encode(question, StandardCharsets.UTF_8) + "&source=searchbox";
+                GptQuestionGenerator gptQuestionGenerator = new GptQuestionGenerator(project, sql);
+                String url = "https://www.phind.com/agent?q=" + URLEncoder.encode(gptQuestionGenerator.getQuestion(), StandardCharsets.UTF_8) + "&source=searchbox";
                 BrowserUtil.browse(url);
             }
         });
