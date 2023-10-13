@@ -124,6 +124,6 @@ public class SqlExecutionStatisticsCollector {
             return;
         }
 
-        this.sql = sql.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll("\t", " ").replaceAll(" +", " ").trim();
+        this.sql = StringHelper.mergedIntoOneLine(sql);
     }
 }
