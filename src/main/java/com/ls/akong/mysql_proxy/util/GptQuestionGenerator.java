@@ -37,7 +37,7 @@ public class GptQuestionGenerator {
      * @return
      */
     public String getQuestion() {
-        String question = "I'd like to improve the performance of this SQL query. Any suggestions? Here's the SQL: \n```\n" + SQLFingerprintGenerator.generateFingerprint(sql) + "\n```\n";
+        String question = "I am a developer, and you are an experienced DBA. Can you assist me in improving the performance of this SQL? Here's the SQL: \n```\n" + SQLFingerprintGenerator.generateFingerprint(sql) + "\n```\n";
 
         try {
             Statement statement = getStatement();
@@ -53,14 +53,14 @@ public class GptQuestionGenerator {
 
             // 2、获取 sql 涉及到的表
             Collection<String> tableNames = getTableNames(sql);
-            String showCreateTableInfo = "";
+            StringBuilder showCreateTableInfo = new StringBuilder();
             for (String tableName : tableNames) {
                 ResultSet tableResultSet = statement.executeQuery("SHOW CREATE TABLE " + tableName);
                 while (tableResultSet.next()) {
-                    if (!showCreateTableInfo.equals("")) {
-                        showCreateTableInfo += "\n";
+                    if (!showCreateTableInfo.toString().equals("")) {
+                        showCreateTableInfo.append("\n");
                     }
-                    showCreateTableInfo += StringHelper.mergedIntoOneLine(tableResultSet.getString("Create Table"));
+                    showCreateTableInfo.append(StringHelper.mergedIntoOneLine(tableResultSet.getString("Create Table")));
                 }
             }
 
