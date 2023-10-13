@@ -6,10 +6,13 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Comparing;
 import com.ls.akong.mysql_proxy.services.MySQLProxyHelperServer;
 import com.ls.akong.mysql_proxy.services.MysqlProxySettings;
+import com.ls.akong.mysql_proxy.services.PersistingSensitiveData;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
 import java.util.Objects;
+
+import static java.lang.Thread.sleep;
 
 public class MysqlProxyConfigurable implements Configurable {
 
@@ -37,6 +40,9 @@ public class MysqlProxyConfigurable implements Configurable {
         assert settings.getState() != null;
         configurableForm.setTargetMysqlIpTextField(settings.getState().originalMysqlIp);
         configurableForm.setTargetMysqlPortTextField(settings.getState().originalMysqlPort);
+        configurableForm.setDatabase(settings.getState().database);
+        configurableForm.setUsername(settings.getState().username);
+        configurableForm.setPassword(PersistingSensitiveData.getPassword());
         configurableForm.setListeningPortTextField(settings.getState().listeningPort);
         configurableForm.setProxyServerStartWithCheckBox(settings.getState().startWithEditor);
         return configurableForm.getPanel();
@@ -56,6 +62,9 @@ public class MysqlProxyConfigurable implements Configurable {
         assert settings.getState() != null;
         settings.getState().originalMysqlIp = configurableForm.getTargetMysqlIpTextField();
         settings.getState().originalMysqlPort = configurableForm.getTargetMysqlPortTextField();
+        settings.getState().database = configurableForm.getDatabase();
+        settings.getState().username = configurableForm.getUsername();
+        PersistingSensitiveData.storePassword(configurableForm.getPassword());
         settings.getState().listeningPort = configurableForm.getListeningPortTextField();
         settings.getState().startWithEditor = configurableForm.getProxyServerStartWithCheckBox();
 
@@ -68,6 +77,11 @@ public class MysqlProxyConfigurable implements Configurable {
             if (answer == Messages.YES) {
                 MySQLProxyHelperServer proxyServer = project.getService(MySQLProxyHelperServer.class);
                 proxyServer.stopServer();
+                try {
+                    sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                 proxyServer.startServer();
             }
         }
@@ -77,6 +91,13 @@ public class MysqlProxyConfigurable implements Configurable {
     public boolean isModified() {
         MysqlProxySettings settings = MysqlProxySettings.getInstance(project);
         assert settings.getState() != null;
-        return configurableForm != null && (!Comparing.equal(configurableForm.getTargetMysqlIpTextField(), settings.getState().originalMysqlIp, true) || !Comparing.equal(configurableForm.getTargetMysqlPortTextField(), settings.getState().originalMysqlPort, true) || !Comparing.equal(configurableForm.getListeningPortTextField(), settings.getState().listeningPort, true) || !Comparing.equal(configurableForm.getProxyServerStartWithCheckBox(), settings.getState().startWithEditor));
+        return configurableForm != null && (
+                !Comparing.equal(configurableForm.getTargetMysqlIpTextField(), settings.getState().originalMysqlIp, true)
+                        || !Comparing.equal(configurableForm.getTargetMysqlPortTextField(), settings.getState().originalMysqlPort, true)
+                        || !Comparing.equal(configurableForm.getDatabase(), settings.getState().database, true)
+                        || !Comparing.equal(configurableForm.getUsername(), settings.getState().username, true)
+                        || !Comparing.equal(configurableForm.getPassword(), PersistingSensitiveData.getPassword(), true)
+                        || !Comparing.equal(configurableForm.getListeningPortTextField(), settings.getState().listeningPort, true)
+                        || !Comparing.equal(configurableForm.getProxyServerStartWithCheckBox(), settings.getState().startWithEditor));
     }
 }

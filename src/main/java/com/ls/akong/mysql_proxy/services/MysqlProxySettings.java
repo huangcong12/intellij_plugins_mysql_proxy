@@ -60,6 +60,10 @@ public final class MysqlProxySettings implements PersistentStateComponent<MysqlP
         public String originalMysqlIp = "";
         // 远程 mysql port
         public String originalMysqlPort = "";
+        // 数据库
+        public String database = "";
+        // 账号
+        public String username = "";
         // 本插件监听的端口
         public String listeningPort = "";
         // 是否跟随编辑器启动
