@@ -32,6 +32,10 @@ dependencies {
     implementation("com.h2database:h2:2.1.214")
     // https://mvnrepository.com/artifact/io.vertx/vertx-core
     implementation("io.vertx:vertx-core:4.4.5")
+    // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
+    implementation("com.mysql:mysql-connector-j:8.1.0")
+    // https://mvnrepository.com/artifact/com.github.jsqlparser/jsqlparser
+    implementation("com.github.mnadeem:sql-table-name-parser:0.0.5")
 }
 
 tasks {
