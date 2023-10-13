@@ -37,7 +37,7 @@ public class GptQuestionGenerator {
      * @return
      */
     public String getQuestion() {
-        String question = "I am a developer, and you are an experienced DBA. Can you assist me in improving the performance of this SQL? Here's the SQL: \n```\n" + SQLFingerprintGenerator.generateFingerprint(sql) + "\n```\n";
+        String question = "I am a developer, and you are an experienced DBA. Please help me improve the performance of this SQL, making it faster, more resource-efficient, and more secure. Here's the SQL: \n```\n" + SQLFingerprintGenerator.generateFingerprint(sql) + "\n```\n";
 
         try {
             Statement statement = getStatement();
