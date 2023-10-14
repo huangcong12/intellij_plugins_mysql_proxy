@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 
 public class SQLFingerprintGenerator {
     public static String generateFingerprint(String sql) {
+        // 截取前 2000 个字符。避免类型 WordPress 这种项目超级长 SQL，导致下面的 replaceValueLists 抛出：Method threw 'java.lang.StackOverflowError' exception. Cannot evaluate java.util.regex.Pattern.toString()
+        sql = sql.length() > 2000 ? sql.substring(0, 2000) : sql;
         sql = removeComments(sql);
         sql = replaceNumericLiterals(sql);
         sql = replaceStringLiterals(sql);
@@ -52,9 +54,7 @@ public class SQLFingerprintGenerator {
 
         StringBuffer result = new StringBuffer();
         while (matcher.find()) {
-            String valueList = matcher.group();
-            String replacement = "?"; // Replace the entire value list with a single '?'
-            matcher.appendReplacement(result, replacement);
+            matcher.appendReplacement(result, "?");
         }
         matcher.appendTail(result);
 

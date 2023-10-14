@@ -85,10 +85,18 @@ public final class MySQLProxyHelperServer {
      * 停止服务
      */
     public void stopServer() {
-        vertx.close();
-
-        isRunning = false;
-        this.notifyListeners();
+        // 关闭Vert.x实例
+        vertx.close(completionHandler -> {
+            if (completionHandler.succeeded()) {
+                // Vert.x实例成功关闭，可以执行重启服务的操作
+                isRunning = false;
+                this.notifyListeners();
+            } else {
+                // 关闭Vert.x实例失败，处理错误情况
+                Throwable cause = completionHandler.cause();
+                cause.printStackTrace();
+            }
+        });
     }
 
     public Boolean isRunning() {
