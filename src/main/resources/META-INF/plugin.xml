@@ -21,6 +21,7 @@
         <p> In the development process, have you ever found yourself mostly focused on coding, dedicating less time and effort to database table creation, indexing, and SQL optimization? Perhaps you've thought that as long as the table relationships are clear, optimization can wait until the data volume increases. This approach is fine, but often, we forget about it until customers complain about system slowness.</p>
         <p> This tool is designed to address precisely this issue. By simply integrating your code with it, you can gain a clear view of all SQL execution records and their durations. You can easily identify which SQL operations can be replaced with caching mechanisms like Redis. When you encounter slow SQL queries, just select them, right-click, and choose an optimization tool (such as GPT or established vendors) to step-by-step improve them.</p>
         <br/>
+
         <p> Suitable Frameworks:</p>
 
         <p> PHP:</p>
@@ -35,7 +36,7 @@
 
         <p> Java:</p>
         <ul>
-            <li> Frameworks using Spring Mybatis</li>
+            <li> Frameworks using Mybatis (Tested successfully with the open-source Spring Mybatis framework.)</li>
         </ul>
 
         <p> Python:</p>
@@ -55,14 +56,18 @@
         <hr/>
         <h3> Usage Recommendations:</h3>
         <ul>
-            <li> After the initial installation, you'll need to configure the remote MySQL's IP, port, and the local proxy listening port. Once configured, please check the "Start Proxy Service with Editor" option. This way, you won't need to start it manually in the future. For the initial installation, you'll need to manually click "Start 'Mysql Proxy Server'".</li>
+            <li> Please check the "Start Proxy Service with Editor" option. This way, you won't need to start it manually in the future. </li>
             <li> If you don't need to view SQL logs temporarily, click the "Stop Recording SQL" switch. When needed, you can reopen the logging.</li>
             <li> If the logged entries exceed 100,000, click the "Clear All Sql Log" button to restart logging from 1 and free up system resources.</li>
             <li> If you wish to copy SQL, besides using Ctrl + C to copy the entire line, you can also right-click and choose "Copy SQL." If there are SQL statements you'd rather not see, you can right-click to delete them or add them to the filter table. Once added to the filter table, they will no longer appear unless you remove them from the filter table.</li>
+            <li> You can identify slow queries based on 'Duration.' When you wish to optimize them, select the query, right-click, and choose 'Optimize with OpenAI (Free GPT-3.5, Login Required)' or another optimization method. This way, you will receive professional optimization advice.</li>
         </ul>
 
         <hr/>
         <h3> FAQ:</h3>
+        <strong> Q: The framework I'm using already logs executed SQL statements, so I don't see much use for this plugin. </strong>
+        <p> A:It might depend on your specific needs. If you only want to know the SQL for a particular API request, then the built-in SQL execution logs of the framework should suffice. However, if you want to understand the SQL executed in more complex logic, such as a specific module or the entire project, then this plugin can be helpful. It can aggregate the information you need to focus on. Additionally, this plugin can serve as a kind of 'mirror' for some projects. Through SQL analysis, you can gain insights into the foundation of a project. Moreover, the plugin has SQL analysis capabilities, helping you collect information and jump to GPT analysis, saving you time and allowing you to work more efficiently.</p>
+        <br/>
         <strong> Q: I followed the documentation, configured everything, and started the proxy service, but I can't see the SQL logs.</strong>
         <p> A: Possible reasons:</p>
         <ul>
