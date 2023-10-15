@@ -16,7 +16,7 @@
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-        <h3> Tool for monitoring code CRUD operations: helps you identify problematic SQL queries and optimize them. </h3>
+        <h3> Tool for monitoring code CRUD: helps you identify problematic SQL and assists you in optimizing it. </h3>
         <br/>
         <p> In the development process, have you ever found yourself mostly focused on coding, dedicating less time and effort to database table creation, indexing, and SQL optimization? Perhaps you've thought that as long as the table relationships are clear, optimization can wait until the data volume increases. This approach is fine, but often, we forget about it until customers complain about system slowness.</p>
         <p> This tool is designed to address precisely this issue. By simply integrating your code with it, you can gain a clear view of all SQL execution records and their durations. You can easily identify which SQL operations can be replaced with caching mechanisms like Redis. When you encounter slow SQL queries, just select them, right-click, and choose an optimization tool (such as GPT or established vendors) to step-by-step improve them.</p>
