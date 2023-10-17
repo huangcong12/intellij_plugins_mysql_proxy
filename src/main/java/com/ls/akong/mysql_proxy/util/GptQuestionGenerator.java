@@ -2,6 +2,10 @@ package com.ls.akong.mysql_proxy.util;
 
 import com.github.mnadeem.TableNameParser;
 import com.intellij.openapi.project.Project;
+import com.ls.akong.mysql_proxy.entity.SqlDatabases;
+import com.ls.akong.mysql_proxy.entity.SqlLog;
+import com.ls.akong.mysql_proxy.model.SqlDatabasesModel;
+import com.ls.akong.mysql_proxy.model.SqlLogModel;
 import com.ls.akong.mysql_proxy.services.MysqlProxySettings;
 import com.ls.akong.mysql_proxy.services.NotificationsService;
 import com.ls.akong.mysql_proxy.services.PersistingSensitiveData;
@@ -15,15 +19,15 @@ import java.util.Objects;
  * 生成 GPT 的问题
  */
 public class GptQuestionGenerator {
-    private final String sql;
+    private final int sqlLogId;
 
-    private Project project;
+    private final Project project;
 
-    private MysqlProxySettings.State state;
+    private final MysqlProxySettings.State state;
 
-    public GptQuestionGenerator(Project project, String sql) {
+    public GptQuestionGenerator(Project project, int sqlLogId) {
         this.project = project;
-        this.sql = sql;
+        this.sqlLogId = sqlLogId;
         this.state = MysqlProxySettings.getInstance(project).getState();
     }
 
@@ -37,10 +41,33 @@ public class GptQuestionGenerator {
      * @return
      */
     public String getQuestion() {
-        String question = "I am a developer, and you are an experienced DBA. Please help me improve the performance of this SQL, making it faster, more resource-efficient, and more secure. Here's the SQL: \n```\n" + SQLFingerprintGenerator.generateFingerprint(sql) + "\n```\n";
+        String question = null;
 
         try {
-            Statement statement = getStatement();
+            // 1、通过 id 查询 sql
+            SqlLog sqlDetail = SqlLogModel.getById(project, sqlLogId);
+            assert sqlDetail != null;
+            if (sqlDetail.getId() == 0) {
+                throw new RuntimeException("Failed to retrieve SQL, please try again.");
+            }
+
+            String sql = sqlDetail.getSql();
+            // 2、判断 sql 是否记录有 database name。如果没有，则使用配置的
+            String database = state.database;
+            if (sqlDetail.getSqlDatabasesId() != 0) {
+                SqlDatabases sqlDatabases = SqlDatabasesModel.getById(project, sqlDetail.getSqlDatabasesId());
+                assert sqlDatabases != null;
+                if (sqlDatabases.getId() == 0) {
+                    throw new RuntimeException("Failed to retrieve SQL from the database, please try again.");
+                }
+
+                database = sqlDatabases.getDatabaseName();
+            }
+
+            // 3、组装 sql
+            question = "I am a developer, and you are an experienced DBA. Please help me improve the performance of this SQL, making it faster, more resource-efficient, and more secure. Here's the SQL: \n```\n" + SQLFingerprintGenerator.generateFingerprint(sql) + "\n```\n";
+
+            Statement statement = getStatement(database);
             // 1、获取 explain 信息
             String explainSql = "explain format=json " + sql;
             ResultSet explainResultSet = statement.executeQuery(explainSql);
@@ -49,7 +76,7 @@ public class GptQuestionGenerator {
                 explainFormatJson = StringHelper.mergedIntoOneLine(explainResultSet.getString("EXPLAIN"));
             }
             // 把 Explain format json 信息放进去
-            question += "The EXPLAIN FORMAT JSON information for this SQL query:\n```\n" + explainFormatJson + "\n```\n";
+            question += "It takes " + sqlDetail.getFormatExecutionTime() + ".The EXPLAIN FORMAT JSON information for this SQL query:\n```\n" + explainFormatJson + "\n```\n";
 
             // 2、获取 sql 涉及到的表
             Collection<String> tableNames = getTableNames(sql);
@@ -88,9 +115,7 @@ public class GptQuestionGenerator {
      * @return
      * @throws SQLException
      */
-    private Statement getStatement() throws SQLException, ClassNotFoundException {
-        String database = state.database;
-
+    private Statement getStatement(String database) throws SQLException, ClassNotFoundException {
         String url = "jdbc:mysql://" + state.originalMysqlIp + ":" + state.originalMysqlPort + "/" + database;
         String username = state.username;
         String password = PersistingSensitiveData.getPassword();

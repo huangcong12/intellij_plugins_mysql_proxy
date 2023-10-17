@@ -98,9 +98,8 @@ public final class MyTableView extends JPanel {
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
                 Object id = table.getModel().getValueAt(selectedRow, 0); // 假设 id 是表的第一列
-                String sql = tableModel.getSqlById((Integer) id);
 
-                GptQuestionGenerator gptQuestionGenerator = new GptQuestionGenerator(project, sql);
+                GptQuestionGenerator gptQuestionGenerator = new GptQuestionGenerator(project, (Integer)id);
                 String url = "https://chat.openai.com/?m=" + URLEncoder.encode(gptQuestionGenerator.getQuestion(), StandardCharsets.UTF_8);
                 BrowserUtil.browse(url);
             }
@@ -112,9 +111,8 @@ public final class MyTableView extends JPanel {
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
                 Object id = table.getModel().getValueAt(selectedRow, 0); // 假设 id 是表的第一列
-                String sql = tableModel.getSqlById((Integer) id);
 
-                GptQuestionGenerator gptQuestionGenerator = new GptQuestionGenerator(project, sql);
+                GptQuestionGenerator gptQuestionGenerator = new GptQuestionGenerator(project, (Integer)id);
                 String url = "https://www.phind.com/agent?q=" + URLEncoder.encode(gptQuestionGenerator.getQuestion(), StandardCharsets.UTF_8) + "&source=searchbox";
                 BrowserUtil.browse(url);
             }

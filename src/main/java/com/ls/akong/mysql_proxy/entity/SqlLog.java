@@ -16,7 +16,6 @@ public class SqlLog {
     private final Long createdAt;
     private final long executionTime;
     private final String signature;
-
     private final int sqlDatabasesId;
 
     public SqlLog(int id, String sql, Long createdAt, long executionTime, String signature, int sqlDatabasesId) {
@@ -30,6 +29,10 @@ public class SqlLog {
 
     public static String getTableName() {
         return tableName;
+    }
+
+    public int getSqlDatabasesId() {
+        return sqlDatabasesId;
     }
 
     public int getId() {

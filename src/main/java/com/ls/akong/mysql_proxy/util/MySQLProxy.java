@@ -10,6 +10,7 @@ import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.NetSocket;
 
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class MySQLProxy extends AbstractVerticle {
     private final StringBuilder sqlBuilder = new StringBuilder();
@@ -65,7 +66,7 @@ public class MySQLProxy extends AbstractVerticle {
     }
 
     /**
-     * 服务器返回包
+     * 客户端发送给服务器的数据包
      *
      * @param buffer
      * @param dst
@@ -75,7 +76,14 @@ public class MySQLProxy extends AbstractVerticle {
         if (buffer.length() > 4) {
             int packetLength = buffer.getMediumLE(0);
             int packetType = buffer.getByte(4);
-            if (packetType == 0x03) { // COM_QUERY
+
+            // 0x02 COM_INIT_DB 选择数据库；有些框架直接使用 0x03 COM_QUERY 发送 use `database` 会走这里，需要兼容一下
+            if (sqlExecutionStatisticsCollector.isDatabaseNameIsEmpty() &&  // 还未设置 database name
+                    (packetType == 0x02     // COM_INIT_DB 情况
+                            || (packetType == 0x03 && isSetDatabaseSql(buffer.getString(5, buffer.length())))   // 混乱的情况，在 COM_QUERY 里传递
+                    )) {
+                sqlExecutionStatisticsCollector.setDatabaseName(buffer.getString(5, buffer.length()));
+            } else if (packetType == 0x03) { // COM_QUERY
                 sqlExecutionStatisticsCollector.startTiming(); // 开始计时
                 handleComQuery(buffer, sqlExecutionStatisticsCollector);
             } else if (packetType == 0x16) { // COM_STMT_PREPARE
@@ -84,12 +92,30 @@ public class MySQLProxy extends AbstractVerticle {
             } else if (packetType == 0x17 && packetLength > 1) { // COM_STMT_EXECUTE
                 sqlExecutionStatisticsCollector.startTiming(); // 开始计时
                 handleComStmtExecute(buffer, sqlExecutionStatisticsCollector);
-            } else if (packetType == 0x02) {    // COM_INIT_DB 选择数据库
-                sqlExecutionStatisticsCollector.setDatabaseName(buffer.getString(5, buffer.length()));
             }
         }
 
         dst.write(buffer);
+    }
+
+    /**
+     * 判断是否是设置 set database 语句
+     * 1、use xx; use `xx`;
+     * 2、use "xx";
+     * 3、use 'xx';
+     * 4、USE xx;
+     * 5、USE `xx`;
+     * 6、USE "xx";
+     * 7、USE 'xxx';
+     * 8、/星 ApplicationName=DataGrip 2023.2 星/ use test
+     *
+     * @param sql
+     * @return
+     */
+    public boolean isSetDatabaseSql(String sql) {
+        // Pattern to match: use xx; use `xx`; use "xx"; use 'xx'; USE xx; USE `xx`; USE "xx"; USE 'xxx'; /* ApplicationName=DataGrip 2023.2 */ use test
+        String pattern = "\\s*(/\\*.*\\*/)?\\s*(?i)use\\s+(`[^`]+`|\"[^\"]+\"|'[^']+'|\\w+);?\\s*";
+        return Pattern.matches(pattern, sql.trim());
     }
 
     /**

@@ -12,6 +12,7 @@ import java.sql.Statement;
 public class SqlDatabasesModel {
     /**
      * 通过 database name 查询 id，如果不存在会新增
+     *
      * @param project
      * @param databaseName
      * @return
@@ -94,5 +95,28 @@ public class SqlDatabasesModel {
     public static String getCreateTableSql() {
         return "CREATE TABLE IF NOT EXISTS " + SqlDatabases.getTableName()
                 + " (id INT AUTO_INCREMENT PRIMARY KEY,database_name VARCHAR(50), created_at BIGINT)";
+    }
+
+    public static SqlDatabases getById(Project project, int id) {
+        String querySQL = "SELECT * FROM " + SqlDatabases.getTableName() + " WHERE id=? ";
+
+        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
+        try (PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(querySQL)) {
+            preparedStatement.setInt(1, id);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    int recordId = resultSet.getInt("id");
+                    String databaseName = resultSet.getString("database_name");
+                    long createdAt = resultSet.getLong("created_at");
+
+                    return new SqlDatabases(recordId, databaseName, createdAt); // 创建并返回对象
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null; // 未找到记录，返回 null 或者根据需求进行错误处理
     }
 }

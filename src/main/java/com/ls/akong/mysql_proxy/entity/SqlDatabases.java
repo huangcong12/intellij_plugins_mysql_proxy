@@ -5,7 +5,6 @@ public class SqlDatabases {
     private final int id;
     private final String databaseName;
     private final Long createdAt;
-
     public SqlDatabases(int id, String databaseName, Long createdAt) {
         this.id = id;
         this.databaseName = databaseName;
@@ -14,6 +13,10 @@ public class SqlDatabases {
 
     public static String getTableName() {
         return tableName;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
     }
 
     public int getId() {
