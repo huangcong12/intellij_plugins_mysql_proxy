@@ -84,6 +84,8 @@ public class MySQLProxy extends AbstractVerticle {
             } else if (packetType == 0x17 && packetLength > 1) { // COM_STMT_EXECUTE
                 sqlExecutionStatisticsCollector.startTiming(); // 开始计时
                 handleComStmtExecute(buffer, sqlExecutionStatisticsCollector);
+            } else if (packetType == 0x02) {    // COM_INIT_DB 选择数据库
+                sqlExecutionStatisticsCollector.setDatabaseName(buffer.getString(5, buffer.length()));
             }
         }
 

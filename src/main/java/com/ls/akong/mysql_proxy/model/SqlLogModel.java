@@ -11,84 +11,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 public class SqlLogModel {
     private static final Logger logger = Logger.getInstance(SqlLogModel.class);
-    private static final int INSERT_INTERVAL_MS = 100;
-
     private static final int MAX_PAGE_SIZE = 100000;
-
-    private static final Map<String, BlockingQueue<String>> projectLogQueues = new HashMap<>();
-    private static final Map<String, Thread> logInsertThreads = new HashMap<>();
-
-    /**
-     * 使用队列的方式保存 sql（暂时弃用，改成实时保存了）
-     *
-     * @param project
-     * @param sql
-     */
-    public static void insertLogByQueue(Project project, String sql) {
-        // Get the project name
-        String projectName = project.getName();
-
-        // Check if a queue for this project already exists
-        BlockingQueue<String> logQueue = projectLogQueues.get(projectName);
-
-        if (logQueue == null) {
-            // Create a new queue for this project
-            logQueue = new LinkedBlockingQueue<>();
-            projectLogQueues.put(projectName, logQueue);
-
-            // Start a new thread for this project
-            BlockingQueue<String> finalLogQueue = logQueue;
-            Thread logInsertThread = new Thread(() -> {
-                while (true) {
-                    try {
-                        // Get the log message from the queue and insert it into the database
-                        String logMessage = finalLogQueue.poll(INSERT_INTERVAL_MS, TimeUnit.MILLISECONDS);
-                        if (logMessage != null) {
-                            insertLogIntoDatabase(project, logMessage);
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            logInsertThread.start();
-
-            // Store the thread in the map for future use
-            logInsertThreads.put(projectName, logInsertThread);
-        }
-
-        // Add the log message to the project's queue
-        logQueue.offer(sql);
-    }
-
-    /**
-     * 保存 sql（和上面的 insertLogByQueue 一起被弃用）
-     *
-     * @param project
-     * @param sql
-     */
-    private static void insertLogIntoDatabase(Project project, String sql) {
-        String insertSQL = "INSERT INTO " + SqlLog.getTableName() + " (sql, created_at) VALUES (?, ?)";
-        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
-
-        try {
-            PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(insertSQL);
-            preparedStatement.setString(1, sql);
-            preparedStatement.setLong(2, System.currentTimeMillis());
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * 查询 sql log 内容，TableView 展示数据用
@@ -154,8 +81,9 @@ public class SqlLogModel {
                 long createdAt = resultSet.getLong("created_at");
                 long executionTime = resultSet.getLong("execution_time");
                 String signature = resultSet.getString("signature");
+                int sqlDatabasesId = resultSet.getInt("sql_databases_id");
 
-                logEntries.add(new SqlLog(id, sql, createdAt, executionTime, signature));
+                logEntries.add(new SqlLog(id, sql, createdAt, executionTime, signature, sqlDatabasesId));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -178,8 +106,9 @@ public class SqlLogModel {
                     long createdAt = resultSet.getLong("created_at");
                     long executionTime = resultSet.getLong("execution_time");
                     String signature = resultSet.getString("signature");
+                    int sqlDatabasesId = resultSet.getInt("sql_databases_id");
 
-                    return new SqlLog(recordId, sql, createdAt, executionTime, signature); // 创建并返回 SqlLog 对象
+                    return new SqlLog(recordId, sql, createdAt, executionTime, signature, sqlDatabasesId); // 创建并返回 SqlLog 对象
                 }
             }
         } catch (SQLException e) {
@@ -205,7 +134,8 @@ public class SqlLogModel {
      * 建表 SQL
      */
     public static String getCreateTableSql() {
-        return "CREATE TABLE IF NOT EXISTS " + SqlLog.getTableName() + " (id INT AUTO_INCREMENT PRIMARY KEY, sql CLOB,execution_time BIGINT,signature char(16), created_at BIGINT)";
+        return "CREATE TABLE IF NOT EXISTS " + SqlLog.getTableName()
+                + " (id INT AUTO_INCREMENT PRIMARY KEY, sql CLOB,execution_time BIGINT,signature char(16),sql_databases_id INT, created_at BIGINT)";
     }
 
     public static void deleteDataById(Project project, int id) {
@@ -228,8 +158,8 @@ public class SqlLogModel {
      * @param executionTime
      * @return
      */
-    public static int insertLog(Project project, String sql, long executionTime, String signature) {
-        String insertSQL = "INSERT INTO " + SqlLog.getTableName() + " (sql,execution_time,signature,created_at) VALUES (?,?,?,?)";
+    public static int insertLog(Project project, String sql, long executionTime, String signature, int sqlDatabaseId) {
+        String insertSQL = "INSERT INTO " + SqlLog.getTableName() + " (sql,execution_time,signature,sql_databases_id,created_at) VALUES (?,?,?,?,?)";
         DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
 
         try {
@@ -237,7 +167,8 @@ public class SqlLogModel {
             preparedStatement.setString(1, sql);
             preparedStatement.setLong(2, executionTime);
             preparedStatement.setString(3, signature);
-            preparedStatement.setLong(4, System.currentTimeMillis());
+            preparedStatement.setLong(4, sqlDatabaseId);
+            preparedStatement.setLong(5, System.currentTimeMillis());
             preparedStatement.executeUpdate();
 
             // 获取生成的键
@@ -250,38 +181,5 @@ public class SqlLogModel {
         }
 
         return -1;
-    }
-
-    /**
-     * 更新执行时间（弃用，目前在插入记录的时候，已经包含执行时间）
-     *
-     * @param project
-     * @param id
-     * @param executionTime
-     * @return
-     */
-    public static boolean updateExecutionTime(Project project, long id, long executionTime) {
-        // SQL UPDATE语句
-        String updateSQL = "UPDATE " + SqlLog.getTableName() + " SET execution_time = ? WHERE id = ?";
-        DatabaseManagerService databaseManager = project.getService(DatabaseManagerService.class);
-
-        try {
-            PreparedStatement preparedStatement = databaseManager.getConnection().prepareStatement(updateSQL);
-            // 设置参数
-            preparedStatement.setLong(1, executionTime);
-            preparedStatement.setLong(2, id);
-
-            // 执行UPDATE语句
-            int rowsUpdated = preparedStatement.executeUpdate();
-
-            if (rowsUpdated == 0) {
-                return false;
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return true;
     }
 }

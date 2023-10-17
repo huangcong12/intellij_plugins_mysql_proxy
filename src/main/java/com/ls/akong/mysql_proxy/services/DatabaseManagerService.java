@@ -5,6 +5,7 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.ls.akong.mysql_proxy.model.SqlDatabasesModel;
 import com.ls.akong.mysql_proxy.model.SqlLogFilterModel;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
 import org.h2.jdbcx.JdbcConnectionPool;
@@ -57,10 +58,12 @@ public final class DatabaseManagerService {
     private void createTableIfNotExists() {
         String createSqlLogTable = SqlLogModel.getCreateTableSql();
         String createSqlLogFilterTable = SqlLogFilterModel.getCreateTableSql();
+        String createSqlDatabasesTable = SqlDatabasesModel.getCreateTableSql();
 
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(createSqlLogTable);
             statement.executeUpdate(createSqlLogFilterTable);
+            statement.executeUpdate(createSqlDatabasesTable);
             logger.info("exec create table SQL success");
         } catch (SQLException e) {
             logger.error("exec create table SQL fail " + e.getMessage());

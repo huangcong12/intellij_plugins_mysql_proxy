@@ -1,6 +1,7 @@
 package com.ls.akong.mysql_proxy.util;
 
 import com.intellij.openapi.project.Project;
+import com.ls.akong.mysql_proxy.model.SqlDatabasesModel;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
 import com.ls.akong.mysql_proxy.services.MyTableView;
 import com.ls.akong.mysql_proxy.services.MysqlProxySettings;
@@ -18,12 +19,17 @@ public class SqlExecutionStatisticsCollector {
     private long startTime;
     private long executionTime;
     private String sql;
+    private int databaseId;
 
     public SqlExecutionStatisticsCollector(Project project) {
         this.project = project;
         this.preparedStatements = new HashMap<>();
         this.preparingStatement = null;
         this.startTime = 0;
+    }
+
+    public void setDatabaseName(String databaseName) {
+        this.databaseId = SqlDatabasesModel.getDatabasesIdByName(project, databaseName);
     }
 
     /**
@@ -103,7 +109,7 @@ public class SqlExecutionStatisticsCollector {
             String signature = SQLFingerprintGenerator.getSignatureBySql(sql);
 
             // 记录 sql 到表里
-            SqlLogModel.insertLog(project, sql, executionTime, signature);
+            SqlLogModel.insertLog(project, sql, executionTime, signature, databaseId);
 
             MyTableView myTableView = MyTableView.getInstance(project);
             myTableView.updateData();
