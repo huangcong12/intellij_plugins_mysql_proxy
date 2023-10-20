@@ -6,7 +6,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Comparing;
 import com.ls.akong.mysql_proxy.services.MySQLProxyHelperServer;
 import com.ls.akong.mysql_proxy.services.MysqlProxySettings;
-import com.ls.akong.mysql_proxy.services.PersistingSensitiveData;
+import com.ls.akong.mysql_proxy.services.PersistingSensitiveDataService;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -42,7 +42,7 @@ public class MysqlProxyConfigurable implements Configurable {
         configurableForm.setTargetMysqlPortTextField(settings.getState().originalMysqlPort);
         configurableForm.setDatabase(settings.getState().database);
         configurableForm.setUsername(settings.getState().username);
-        configurableForm.setPassword(PersistingSensitiveData.getPassword());
+        configurableForm.setPassword(PersistingSensitiveDataService.getPassword());
         configurableForm.setListeningPortTextField(settings.getState().listeningPort);
         configurableForm.setProxyServerStartWithCheckBox(settings.getState().startWithEditor);
         return configurableForm.getPanel();
@@ -64,7 +64,7 @@ public class MysqlProxyConfigurable implements Configurable {
         settings.getState().originalMysqlPort = configurableForm.getTargetMysqlPortTextField();
         settings.getState().database = configurableForm.getDatabase();
         settings.getState().username = configurableForm.getUsername();
-        PersistingSensitiveData.storePassword(configurableForm.getPassword());
+        PersistingSensitiveDataService.storePassword(configurableForm.getPassword());
         settings.getState().listeningPort = configurableForm.getListeningPortTextField();
         settings.getState().startWithEditor = configurableForm.getProxyServerStartWithCheckBox();
 
@@ -96,7 +96,7 @@ public class MysqlProxyConfigurable implements Configurable {
                         || !Comparing.equal(configurableForm.getTargetMysqlPortTextField(), settings.getState().originalMysqlPort, true)
                         || !Comparing.equal(configurableForm.getDatabase(), settings.getState().database, true)
                         || !Comparing.equal(configurableForm.getUsername(), settings.getState().username, true)
-                        || !Comparing.equal(configurableForm.getPassword(), PersistingSensitiveData.getPassword(), true)
+                        || !Comparing.equal(configurableForm.getPassword(), PersistingSensitiveDataService.getPassword(), true)
                         || !Comparing.equal(configurableForm.getListeningPortTextField(), settings.getState().listeningPort, true)
                         || !Comparing.equal(configurableForm.getProxyServerStartWithCheckBox(), settings.getState().startWithEditor));
     }

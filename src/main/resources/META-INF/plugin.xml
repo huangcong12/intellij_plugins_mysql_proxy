@@ -175,7 +175,7 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="MySQL Proxy" icon="/icons/logo.svg" anchor="bottom"
-                    factoryClass="com.ls.akong.mysql_proxy.ui.SqlToolWindowFactory"/>
+                    factoryClass="com.ls.akong.mysql_proxy.ui.BaseToolWindowFactory"/>
         <projectConfigurable
                 parentId="tools"
                 id="com.kong.mycompany.mysql_proxy.MysqlProxyConfigurable"

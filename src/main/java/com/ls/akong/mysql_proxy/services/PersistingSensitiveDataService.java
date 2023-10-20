@@ -5,8 +5,11 @@ import com.intellij.credentialStore.CredentialAttributesKt;
 import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.openapi.components.Service;
 
+/**
+ * 保存敏感信息的服务
+ */
 @Service(Service.Level.PROJECT)
-public class PersistingSensitiveData {
+public class PersistingSensitiveDataService {
 
     private final static String databaseSensitiveKey = "DATABASE_SENSITIVE_KEY";
 

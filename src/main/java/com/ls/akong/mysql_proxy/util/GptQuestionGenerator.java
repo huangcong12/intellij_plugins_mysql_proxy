@@ -8,7 +8,7 @@ import com.ls.akong.mysql_proxy.model.SqlDatabasesModel;
 import com.ls.akong.mysql_proxy.model.SqlLogModel;
 import com.ls.akong.mysql_proxy.services.MysqlProxySettings;
 import com.ls.akong.mysql_proxy.services.NotificationsService;
-import com.ls.akong.mysql_proxy.services.PersistingSensitiveData;
+import com.ls.akong.mysql_proxy.services.PersistingSensitiveDataService;
 
 import java.sql.*;
 import java.util.Collection;
@@ -118,7 +118,7 @@ public class GptQuestionGenerator {
     private Statement getStatement(String database) throws SQLException, ClassNotFoundException {
         String url = "jdbc:mysql://" + state.originalMysqlIp + ":" + state.originalMysqlPort + "/" + database;
         String username = state.username;
-        String password = PersistingSensitiveData.getPassword();
+        String password = PersistingSensitiveDataService.getPassword();
         if (Objects.equals(database, "") || Objects.equals(username, "")) {
             throw new RuntimeException("database is empty or username is empty");
         }
