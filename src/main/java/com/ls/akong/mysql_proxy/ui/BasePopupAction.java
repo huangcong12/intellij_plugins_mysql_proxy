@@ -37,6 +37,7 @@ import javax.swing.border.Border;
 import java.awt.event.*;
 
 /**
+ * 从其他插件抄来的，给 filter 用的
  * Merge of original BasePopupAction (IntelliJ < 14) and com.intellij.vcs.log.ui.filter.FilterPopupComponent.
  */
 public abstract class BasePopupAction extends DumbAwareAction implements CustomComponentAction {
@@ -70,6 +71,16 @@ public abstract class BasePopupAction extends DumbAwareAction implements CustomC
         showPopupMenuFromKeyboard();
         indicateHovering();
         indicateFocusing();
+    }
+
+    private static Border createFocusedBorder() {
+        return BorderFactory.createCompoundBorder(new RoundedLineBorder(UIUtil.getHeaderActiveColor(), 10, BORDER_SIZE),
+                INNER_MARGIN_BORDER);
+    }
+
+    private static Border createUnfocusedBorder() {
+        return BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE),
+                INNER_MARGIN_BORDER);
     }
 
     private DefaultActionGroup createActionGroup() {
@@ -154,7 +165,7 @@ public abstract class BasePopupAction extends DumbAwareAction implements CustomC
     private void setDefaultForeground() {
         myFilterNameLabel.setForeground(UIUtil.isUnderDarcula() ? UIUtil.getLabelForeground() : UIUtil.getInactiveTextColor());
         myFilterValueLabel.setForeground(UIUtil.isUnderDarcula() ? UIUtil.getLabelForeground() :
-            UIUtil.getInactiveTextColor().darker().darker());
+                UIUtil.getInactiveTextColor().darker().darker());
     }
 
     private void setOnHoverForeground() {
@@ -162,20 +173,9 @@ public abstract class BasePopupAction extends DumbAwareAction implements CustomC
         myFilterValueLabel.setForeground(UIUtil.isUnderDarcula() ? UIUtil.getLabelForeground() : UIUtil.getTextFieldForeground());
     }
 
-
     private void showPopupMenu() {
         ListPopup popup = JBPopupFactory.getInstance().createActionGroupPopup(null, createActionGroup(),
-            DataManager.getInstance().getDataContext(myPanel), JBPopupFactory.ActionSelectionAid.SPEEDSEARCH, false);
+                DataManager.getInstance().getDataContext(myPanel), JBPopupFactory.ActionSelectionAid.SPEEDSEARCH, false);
         popup.showUnderneathOf(myPanel);
-    }
-
-    private static Border createFocusedBorder() {
-        return BorderFactory.createCompoundBorder(new RoundedLineBorder(UIUtil.getHeaderActiveColor(), 10, BORDER_SIZE),
-            INNER_MARGIN_BORDER);
-    }
-
-    private static Border createUnfocusedBorder() {
-        return BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(BORDER_SIZE, BORDER_SIZE, BORDER_SIZE, BORDER_SIZE),
-            INNER_MARGIN_BORDER);
     }
 }
