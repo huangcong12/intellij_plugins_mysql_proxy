@@ -6,6 +6,9 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
 
+/**
+ * 填充数据左边 Table CheckBox 用
+ */
 public class CheckBoxNodeRenderer implements TreeCellRenderer {
     private final JCheckBox leafRenderer = new JCheckBox();
     private DefaultTreeCellRenderer nonLeafRenderer = new DefaultTreeCellRenderer();

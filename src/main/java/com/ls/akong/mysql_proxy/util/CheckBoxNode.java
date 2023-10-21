@@ -1,5 +1,8 @@
 package com.ls.akong.mysql_proxy.util;
 
+/**
+ * 填充数据左边 Table CheckBox 用
+ */
 public class CheckBoxNode {
     String text;
     boolean selected;

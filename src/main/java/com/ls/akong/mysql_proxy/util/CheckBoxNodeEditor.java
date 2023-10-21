@@ -9,6 +9,9 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
 
+/**
+ * 填充数据左边 Table CheckBox 用
+ */
 public class CheckBoxNodeEditor extends AbstractCellEditor implements TreeCellEditor {
     CheckBoxNodeRenderer renderer = new CheckBoxNodeRenderer();
     ChangeEvent changeEvent = null;
