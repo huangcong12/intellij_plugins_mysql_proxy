@@ -23,12 +23,12 @@ public class GptQuestionGenerator {
 
     private final Project project;
 
-    private final MysqlProxySettings.State state;
+    private final MysqlProxySettings settings;
 
     public GptQuestionGenerator(Project project, int sqlLogId) {
         this.project = project;
         this.sqlLogId = sqlLogId;
-        this.state = MysqlProxySettings.getInstance(project).getState();
+        this.settings = MysqlProxySettings.getInstance(project);
     }
 
     public Collection<String> getTableNames(String sql) {
@@ -53,7 +53,7 @@ public class GptQuestionGenerator {
 
             String sql = sqlDetail.getSql();
             // 2、判断 sql 是否记录有 database name。如果没有，则使用配置的
-            String database = state.database;
+            String database = settings.getDatabase();
             if (sqlDetail.getSqlDatabasesId() != 0) {
                 SqlDatabases sqlDatabases = SqlDatabasesModel.getById(project, sqlDetail.getSqlDatabasesId());
                 assert sqlDatabases != null;
@@ -116,8 +116,8 @@ public class GptQuestionGenerator {
      * @throws SQLException
      */
     private Statement getStatement(String database) throws SQLException, ClassNotFoundException {
-        String url = "jdbc:mysql://" + state.originalMysqlIp + ":" + state.originalMysqlPort + "/" + database;
-        String username = state.username;
+        String url = "jdbc:mysql://" + settings.getOriginalMysqlIp() + ":" + settings.getOriginalMysqlPort() + "/" + database;
+        String username = settings.getUsername();
         String password = PersistingSensitiveDataService.getPassword();
         if (Objects.equals(database, "") || Objects.equals(username, "")) {
             throw new RuntimeException("database is empty or username is empty");

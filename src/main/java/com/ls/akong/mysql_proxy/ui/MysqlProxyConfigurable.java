@@ -37,14 +37,13 @@ public class MysqlProxyConfigurable implements Configurable {
         }
 
         MysqlProxySettings settings = MysqlProxySettings.getInstance(project);
-        assert settings.getState() != null;
-        configurableForm.setTargetMysqlIpTextField(settings.getState().originalMysqlIp);
-        configurableForm.setTargetMysqlPortTextField(settings.getState().originalMysqlPort);
-        configurableForm.setDatabase(settings.getState().database);
-        configurableForm.setUsername(settings.getState().username);
+        configurableForm.setTargetMysqlIpTextField(settings.getOriginalMysqlIp());
+        configurableForm.setTargetMysqlPortTextField(settings.getOriginalMysqlPort());
+        configurableForm.setDatabase(settings.getDatabase());
+        configurableForm.setUsername(settings.getUsername());
         configurableForm.setPassword(PersistingSensitiveDataService.getPassword());
-        configurableForm.setListeningPortTextField(settings.getState().listeningPort);
-        configurableForm.setProxyServerStartWithCheckBox(settings.getState().startWithEditor);
+        configurableForm.setListeningPortTextField(settings.getListeningPort());
+        configurableForm.setProxyServerStartWithCheckBox(settings.isStartWithEditor());
         return configurableForm.getPanel();
     }
 
@@ -59,19 +58,18 @@ public class MysqlProxyConfigurable implements Configurable {
         boolean isModified = isModified();
 
         MysqlProxySettings settings = MysqlProxySettings.getInstance(project);
-        assert settings.getState() != null;
-        settings.getState().originalMysqlIp = configurableForm.getTargetMysqlIpTextField();
-        settings.getState().originalMysqlPort = configurableForm.getTargetMysqlPortTextField();
-        settings.getState().database = configurableForm.getDatabase();
-        settings.getState().username = configurableForm.getUsername();
+        settings.setOriginalMysqlIp(configurableForm.getTargetMysqlIpTextField());
+        settings.setOriginalMysqlPort(configurableForm.getTargetMysqlPortTextField());
+        settings.setDatabase(configurableForm.getDatabase());
+        settings.setUsername(configurableForm.getUsername());
+        settings.setListeningPort(configurableForm.getListeningPortTextField());
+        settings.setStartWithEditor(configurableForm.getProxyServerStartWithCheckBox());
         PersistingSensitiveDataService.storePassword(configurableForm.getPassword());
-        settings.getState().listeningPort = configurableForm.getListeningPortTextField();
-        settings.getState().startWithEditor = configurableForm.getProxyServerStartWithCheckBox();
 
         // 如果修改了，询问是否重启
-        if (isModified && !Objects.equals(settings.getState().originalMysqlIp, "")
-                && !Objects.equals(settings.getState().originalMysqlPort, "")
-                && !Objects.equals(settings.getState().listeningPort, "")) {
+        if (isModified && !Objects.equals(settings.getOriginalMysqlIp(), "")
+                && !Objects.equals(settings.getOriginalMysqlPort(), "")
+                && !Objects.equals(settings.getListeningPort(), "")) {
             int answer = Messages.showYesNoDialog("Restart proxy service?", "Confirmation", Messages.getQuestionIcon());
 
             if (answer == Messages.YES) {
@@ -90,14 +88,13 @@ public class MysqlProxyConfigurable implements Configurable {
     @Override
     public boolean isModified() {
         MysqlProxySettings settings = MysqlProxySettings.getInstance(project);
-        assert settings.getState() != null;
         return configurableForm != null && (
-                !Comparing.equal(configurableForm.getTargetMysqlIpTextField(), settings.getState().originalMysqlIp, true)
-                        || !Comparing.equal(configurableForm.getTargetMysqlPortTextField(), settings.getState().originalMysqlPort, true)
-                        || !Comparing.equal(configurableForm.getDatabase(), settings.getState().database, true)
-                        || !Comparing.equal(configurableForm.getUsername(), settings.getState().username, true)
+                !Comparing.equal(configurableForm.getTargetMysqlIpTextField(), settings.getOriginalMysqlIp(), true)
+                        || !Comparing.equal(configurableForm.getTargetMysqlPortTextField(), settings.getOriginalMysqlPort(), true)
+                        || !Comparing.equal(configurableForm.getDatabase(), settings.getDatabase(), true)
+                        || !Comparing.equal(configurableForm.getUsername(), settings.getUsername(), true)
                         || !Comparing.equal(configurableForm.getPassword(), PersistingSensitiveDataService.getPassword(), true)
-                        || !Comparing.equal(configurableForm.getListeningPortTextField(), settings.getState().listeningPort, true)
-                        || !Comparing.equal(configurableForm.getProxyServerStartWithCheckBox(), settings.getState().startWithEditor));
+                        || !Comparing.equal(configurableForm.getListeningPortTextField(), settings.getListeningPort(), true)
+                        || !Comparing.equal(configurableForm.getProxyServerStartWithCheckBox(), settings.isStartWithEditor()));
     }
 }

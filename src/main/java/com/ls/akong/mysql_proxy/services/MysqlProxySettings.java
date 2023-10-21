@@ -5,6 +5,7 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -27,7 +28,7 @@ public final class MysqlProxySettings implements PersistentStateComponent<MysqlP
     }
 
     @Override
-    public void loadState(State state) {
+    public void loadState(@NotNull State state) {
         myState = state;
     }
 
@@ -38,6 +39,9 @@ public final class MysqlProxySettings implements PersistentStateComponent<MysqlP
         return myState.isMonitorEnabled;
     }
 
+    public void setMonitorEnabled(boolean monitorEnabled) {
+        myState.isMonitorEnabled = monitorEnabled;
+    }
 
     /**
      * 切换是否监听 sql 日志
@@ -51,6 +55,50 @@ public final class MysqlProxySettings implements PersistentStateComponent<MysqlP
      */
     public boolean isStartWithEditor() {
         return myState.startWithEditor;
+    }
+
+    public void setStartWithEditor(boolean startWithEditor) {
+        myState.startWithEditor = startWithEditor;
+    }
+
+    public String getOriginalMysqlIp() {
+        return myState.originalMysqlIp;
+    }
+
+    public void setOriginalMysqlIp(String originalMysqlIp) {
+        myState.originalMysqlIp = originalMysqlIp;
+    }
+
+    public String getOriginalMysqlPort() {
+        return myState.originalMysqlPort;
+    }
+
+    public void setOriginalMysqlPort(String originalMysqlPort) {
+        myState.originalMysqlPort = originalMysqlPort;
+    }
+
+    public String getDatabase() {
+        return myState.database;
+    }
+
+    public void setDatabase(String database) {
+        myState.database = database;
+    }
+
+    public String getUsername() {
+        return myState.username;
+    }
+
+    public void setUsername(String username) {
+        myState.username = username;
+    }
+
+    public String getListeningPort() {
+        return myState.listeningPort;
+    }
+
+    public void setListeningPort(String listeningPort) {
+        myState.listeningPort = listeningPort;
     }
 
     public static class State {

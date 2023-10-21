@@ -34,23 +34,22 @@ public final class MySQLProxyHelperServer {
      * 启动服务
      */
     public void startServer() {
-        MysqlProxySettings.State state = MysqlProxySettings.getInstance(project).getState();
-        assert state != null;
+        MysqlProxySettings settings = MysqlProxySettings.getInstance(project);
 
         // Mysql Server Ip 校验
-        if (Objects.equals(state.originalMysqlIp, "")) {
+        if (Objects.equals(settings.getOriginalMysqlIp(), "")) {
             Messages.showErrorDialog("Run parameter exception. Please go to the Configuration Management page, fill in the 'Remote MySQL Server IP Address' field, and try again.", "Invalid Run Configuration");
             ShowSettingsUtil.getInstance().showSettingsDialog(project, MysqlProxyConfigurable.class);
             return;
         }
-        if (Objects.equals(state.originalMysqlPort, "")) {
+        if (Objects.equals(settings.getOriginalMysqlPort(), "")) {
             Messages.showErrorDialog("Run parameter exception. Please go to the Configuration Management page, fill in the 'Remote MySQL Server Port' field, and try again.", "Invalid Run Configuration");
             ShowSettingsUtil.getInstance().showSettingsDialog(project, MysqlProxyConfigurable.class);
             return;
         }
 
         // 监听的端口校验
-        int proxyPort = Objects.equals(state.listeningPort, "") ? 0 : Integer.parseInt(state.listeningPort);
+        int proxyPort = Objects.equals(settings.getListeningPort(), "") ? 0 : Integer.parseInt(settings.getListeningPort());
         if (proxyPort == 0) {
             Messages.showErrorDialog("Run parameter exception. Please go to the Configuration Management page, fill in the 'Listening port' field, and try again.", "Invalid Run Configuration");
             ShowSettingsUtil.getInstance().showSettingsDialog(project, MysqlProxyConfigurable.class);
@@ -75,7 +74,7 @@ public final class MySQLProxyHelperServer {
         }
 
         vertx = Vertx.vertx();
-        vertx.deployVerticle(new MySQLProxy(project, state.originalMysqlIp, Integer.parseInt(state.originalMysqlPort), proxyPort));
+        vertx.deployVerticle(new MySQLProxy(project, settings.getOriginalMysqlIp(), Integer.parseInt(settings.getOriginalMysqlPort()), proxyPort));
 
         isRunning = true;
         this.notifyListeners();
