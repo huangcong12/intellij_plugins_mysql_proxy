@@ -1,6 +1,6 @@
 package com.ls.akong.mysql_proxy.util;
 
-class CheckBoxNode {
+public class CheckBoxNode {
     String text;
     boolean selected;
 
