@@ -33,11 +33,13 @@ public class BaseToolWindowFactory implements ToolWindowFactory, DumbAware, Mysq
         SQLHistoryToolWindow history = new SQLHistoryToolWindow(project);
         Content historyContent = history.getContent();
         contentManager.addContent(historyContent);
-        contentManager.setSelectedContent(historyContent);     // 默认选中
+//        contentManager.setSelectedContent(historyContent);     // 默认选中
 
         // 2、数据填充页
         DatabaseSeederToolWindow seeder = new DatabaseSeederToolWindow(project);
-        contentManager.addContent(seeder.getContent());
+        Content seederContent = seeder.getContent();
+        contentManager.addContent(seederContent);
+        contentManager.setSelectedContent(seederContent);     // 默认选中
 
         // 监听代理服务器状态
         MySQLProxyHelperServer proxyServer = project.getService(MySQLProxyHelperServer.class);
