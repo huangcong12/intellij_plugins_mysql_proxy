@@ -21,9 +21,7 @@ public class RecordingSwitchAction extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
         MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(Objects.requireNonNull(e.getProject()));
-        logger.info("目前：" + recordingSwitch.isMonitorEnabled());
         recordingSwitch.toggleMonitorEnabled();
-        logger.info("点击后变成：" + recordingSwitch.isMonitorEnabled());
     }
 
     @Override
