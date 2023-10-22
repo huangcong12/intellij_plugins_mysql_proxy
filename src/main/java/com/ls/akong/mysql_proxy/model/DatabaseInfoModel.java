@@ -6,6 +6,7 @@ import com.ls.akong.mysql_proxy.services.PersistingSensitiveDataService;
 import com.ls.akong.mysql_proxy.util.StringHelper;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class DatabaseInfoModel {
@@ -57,6 +58,29 @@ public class DatabaseInfoModel {
         return tableDDL;
     }
 
+    /**
+     * 获取所有的 table
+     *
+     * @param databaseName
+     * @return
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    public ArrayList<String> getAllTable(String databaseName) throws SQLException, ClassNotFoundException {
+        String sql = "SHOW TABLES";
+        ResultSet tableResultSet = getStatement(databaseName).executeQuery(sql);
+
+        ArrayList<String> tables = new ArrayList<String>();
+        while (tableResultSet.next()) {
+            tables.add(tableResultSet.getString("Tables_in_" + databaseName));
+        }
+
+        return tables;
+    }
+
+    /**
+     * 关闭数据库资源
+     */
     public void close() {
         try {
             // 关闭数据库连接
