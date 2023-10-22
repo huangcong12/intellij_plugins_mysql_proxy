@@ -3,6 +3,8 @@ package com.ls.akong.mysql_proxy.ui;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
+import com.ls.akong.mysql_proxy.model.DatabaseInfoModel;
+import com.ls.akong.mysql_proxy.services.MysqlProxySettings;
 import com.ls.akong.mysql_proxy.ui.menu.DatabaseSeederPopupMenuModel;
 import com.ls.akong.mysql_proxy.util.CheckBoxNode;
 import com.ls.akong.mysql_proxy.util.CheckBoxNodeEditor;
@@ -16,13 +18,17 @@ import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class DatabaseSeederToolWindow {
     private final Project project;
+    private MysqlProxySettings settings;
 
     public DatabaseSeederToolWindow(Project project) {
         this.project = project;
+
+        this.settings = MysqlProxySettings.getInstance(project);
     }
 
     public Content getContent() {
@@ -46,7 +52,7 @@ public class DatabaseSeederToolWindow {
      */
     private JPanel getLeftPane() {
         // 创建树形结构
-        String databaseName = "yyladmin";
+        String databaseName = settings.getDatabase();
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(databaseName);
 
         // 创建树模型并设置为JTree的模型
@@ -124,23 +130,25 @@ public class DatabaseSeederToolWindow {
      * @param treeModel
      */
     private void setTableTree(DefaultMutableTreeNode rootNode, String searchText, DefaultTreeModel treeModel) {
-        ArrayList<String> children = new ArrayList<>();
-        children.add("users");
-        children.add("order");
-        children.add("order_ext");
-        children.add("ya_file");
+        try {
+            DatabaseInfoModel databaseInfoModel = new DatabaseInfoModel(project);
+            ArrayList<String> tables = databaseInfoModel.getAllTable(settings.getDatabase());
 
-        rootNode.removeAllChildren();
+            rootNode.removeAllChildren();
 
-        for (String child : children) {
-            // 假如条件搜索
-            if (searchText != null && !child.contains(searchText)) {
-                continue;
+            for (String table : tables) {
+                // 假如条件搜索
+                if (searchText != null && !table.contains(searchText)) {
+                    continue;
+                }
+                rootNode.add(new DefaultMutableTreeNode(table));
             }
-            rootNode.add(new DefaultMutableTreeNode(child));
-        }
 
-        // 通知模型数据已经改变
-        treeModel.reload(rootNode);
+            // 通知模型数据已经改变
+            treeModel.reload(rootNode);
+
+        } catch (SQLException | ClassNotFoundException e) {
+            // TODO 抛出错误，提示用户
+        }
     }
 }
