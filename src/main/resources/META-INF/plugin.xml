@@ -10,7 +10,7 @@
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor email="huangcong12@gmail.com" url="https://huangcong12.github.io/#/">wuqing</vendor>
 
-    <product-descriptor code="PMYSQLPROXY" release-date="20230903" release-version="10"/>
+    <product-descriptor code="PMYSQLPROXY" release-date="20230903" release-version="10" optional="true"/>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
@@ -20,6 +20,18 @@
         <br/>
         <p> In the development process, have you ever found yourself mostly focused on coding, dedicating less time and effort to database table creation, indexing, and SQL optimization? Perhaps you've thought that as long as the table relationships are clear, optimization can wait until the data volume increases. This approach is fine, but often, we forget about it until customers complain about system slowness.</p>
         <p> This tool is designed to address precisely this issue. By simply integrating your code with it, you can gain a clear view of all SQL execution records and their durations. You can easily identify which SQL operations can be replaced with caching mechanisms like Redis. When you encounter slow SQL queries, just select them, right-click, and choose an optimization tool (such as GPT or established vendors) to step-by-step improve them.</p>
+        <br/>
+
+        <h3> Features:</h3>
+        <p>Free features: </p>
+        <ul>
+            <li>SQL History (Current functionality)</li>
+        </ul>
+        <p>Paid features:</p>
+        <ul>
+            <li>Database Seeder (In development)</li>
+        </ul>
+
         <br/>
         <p> <a href="https://github.com/huangcong12/intellij-mysql-proxy/blob/main/README.zh_CN.md" target="_blank">中文文档</a> </p>
 
@@ -92,6 +104,13 @@
 
     <h2>Important Note:</h2>
     You can report exception-issues directly from your IDE. Please add at least a comment what you have done when it occurred / how you can reproduce it. It would be even better when add an email address so I can contact you in case of questions.
+
+    <h2> 1.0.9 </h2>
+    <h3>Features</h3>
+    <ul>
+        <li>从付费插件改成 freemium</li>
+        <li>优化获取 SQL 的 explain 信息、表 DDL 信息的 database 取值：从 setting 页面填写的 database 改成从 SQL 的最初选择数据库语句获取</li>
+    </ul>
 
     <h2> 1.0.8 </h2>
     <h3>Features</h3>
