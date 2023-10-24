@@ -84,7 +84,7 @@ public class DatabaseSeederToolWindow {
 
                         // 弹出菜单
                         tree.setSelectionPath(path);
-                        DatabaseSeederPopupMenuModel.createPopupMenu(tableName).show(tree, e.getX(), e.getY());
+                        DatabaseSeederPopupMenuModel.createPopupMenu(project, tableName).show(tree, e.getX(), e.getY());
                     }
                 }
             }

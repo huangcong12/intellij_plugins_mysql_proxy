@@ -40,6 +40,29 @@ public class DatabaseInfoModel {
     }
 
     /**
+     * 获取一个表的所有字段
+     *
+     * @param databaseName
+     * @param tableName
+     * @return
+     * @throws SQLException
+     */
+    public ArrayList<TableColumnInfo> getTableMetaData(String databaseName, String tableName) throws SQLException, ClassNotFoundException {
+        DatabaseMetaData metaData = getConnection(databaseName).getMetaData();
+        ResultSet resultSet = metaData.getColumns(null, null, tableName, null);
+
+        ArrayList<TableColumnInfo> columnInfoList = new ArrayList<TableColumnInfo>();
+        while (resultSet.next()) {
+            String columnName = resultSet.getString("COLUMN_NAME");
+            String dataType = resultSet.getString("TYPE_NAME");
+            TableColumnInfo columnInfo = new TableColumnInfo(columnName, dataType);
+            columnInfoList.add(columnInfo);
+        }
+
+        return columnInfoList;
+    }
+
+    /**
      * 获取表的 DDL 信息
      *
      * @param tableName
@@ -100,6 +123,17 @@ public class DatabaseInfoModel {
      * @throws SQLException
      */
     private Statement getStatement(String database) throws SQLException, ClassNotFoundException {
+        return getConnection(database).createStatement();
+    }
+
+    /**
+     * 获取数据库连接
+     *
+     * @param database
+     * @return
+     * @throws SQLException
+     */
+    private Connection getConnection(String database) throws SQLException, ClassNotFoundException {
         String url = "jdbc:mysql://" + settings.getOriginalMysqlIp() + ":" + settings.getOriginalMysqlPort() + "/" + database;
         String username = settings.getUsername();
         String password = PersistingSensitiveDataService.getPassword();
@@ -110,6 +144,6 @@ public class DatabaseInfoModel {
         Class.forName("com.mysql.cj.jdbc.Driver");
         connection = DriverManager.getConnection(url, username, password);
 
-        return connection.createStatement();
+        return connection;
     }
 }
