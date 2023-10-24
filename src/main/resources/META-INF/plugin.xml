@@ -108,8 +108,8 @@
     <h2> 1.0.9 </h2>
     <h3>Features</h3>
     <ul>
-        <li>从付费插件改成 freemium</li>
-        <li>优化获取 SQL 的 explain 信息、表 DDL 信息的 database 取值：从 setting 页面填写的 database 改成从 SQL 的最初选择数据库语句获取</li>
+        <li>Transition from a paid plugin to freemium.</li>
+        <li>Optimize the database value retrieval for acquiring SQL explain information and table DDL information: Change from the database set in the settings page to the initial database selection statement in SQL.</li>
     </ul>
 
     <h2> 1.0.8 </h2>
