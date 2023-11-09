@@ -18,6 +18,7 @@ import com.ls.akong.mysql_proxy.services.MyTableView;
 import com.ls.akong.mysql_proxy.services.MysqlProxyServiceStateListener;
 import com.ls.akong.mysql_proxy.ui.action.RecordingSwitchAction;
 import com.ls.akong.mysql_proxy.ui.filter.FilterModule;
+import com.ls.akong.mysql_proxy.util.VersionUpdateChecker;
 
 import javax.swing.*;
 
@@ -72,6 +73,9 @@ public class SqlToolWindowFactory implements ToolWindowFactory, DumbAware, Mysql
         // 监听代理服务器状态
         MySQLProxyHelperServer proxyServer = project.getService(MySQLProxyHelperServer.class);
         proxyServer.addListener(this);  // 增加订阅状态变化
+
+        // 检查版本更新
+        VersionUpdateChecker.versionUpdateNotification(project);
     }
 
     /**
