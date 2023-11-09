@@ -36,7 +36,7 @@ public class NotificationsService {
      *
      * @param project
      */
-    public static void notifyUpdateAvailable(Project project) {
+    public static void notifyUpdateAvailable(Project project, String latestVersion) {
         // Mysql Proxy 有新版本可用，请在插件设置的'Installed'标签页中查看
         String content = "Please check the 'Installed' tab in the plugin settings.";
         String title = "New version available for MySQL Proxy"; // 新版本可用
@@ -57,6 +57,7 @@ public class NotificationsService {
             @Override
             public void actionPerformed(AnActionEvent e) {
                 // 用户选择跳过这个版本的操作
+                MysqlProxySettings.getInstance(project).addSkippedVersion(latestVersion);
                 notification.expire();
             }
         });

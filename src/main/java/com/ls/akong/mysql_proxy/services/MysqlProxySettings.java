@@ -7,6 +7,7 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 /**
  * 状态持久化
@@ -53,7 +54,28 @@ public final class MysqlProxySettings implements PersistentStateComponent<MysqlP
         return myState.startWithEditor;
     }
 
+    /**
+     * 增加跳过版本号
+     *
+     * @param version
+     */
+    public void addSkippedVersion(String version) {
+        myState.skippedVersions = version;
+    }
+
+    /**
+     * 判断是否是跳过的版本号
+     *
+     * @param version
+     * @return
+     */
+    public boolean isVersionSkipped(String version) {
+        return Objects.equals(myState.skippedVersions, version);
+    }
+
     public static class State {
+        // 跳过的最新版本号
+        public String skippedVersions = "";
         // 是否开启监听 sql 日志
         public boolean isMonitorEnabled = true;
         // 远程 mysql ip

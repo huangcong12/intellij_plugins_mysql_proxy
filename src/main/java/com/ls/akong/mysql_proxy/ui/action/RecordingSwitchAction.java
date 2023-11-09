@@ -2,7 +2,6 @@ package com.ls.akong.mysql_proxy.ui.action;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.IconLoader;
 import com.ls.akong.mysql_proxy.services.MysqlProxySettings;
 
@@ -13,17 +12,13 @@ import java.util.Objects;
  * 监听、关闭监听 sql log 按钮点击调用
  */
 public class RecordingSwitchAction extends AnAction {
-    private static final Logger logger = Logger.getInstance(RecordingSwitchAction.class);
-
     /**
      * 按钮点击调用
      */
     @Override
     public void actionPerformed(AnActionEvent e) {
         MysqlProxySettings recordingSwitch = MysqlProxySettings.getInstance(Objects.requireNonNull(e.getProject()));
-        logger.info("目前：" + recordingSwitch.isMonitorEnabled());
         recordingSwitch.toggleMonitorEnabled();
-        logger.info("点击后变成：" + recordingSwitch.isMonitorEnabled());
     }
 
     @Override
