@@ -99,7 +99,7 @@ public final class MyTableView extends JPanel {
             if (selectedRow != -1) {
                 Object id = table.getModel().getValueAt(selectedRow, 0); // 假设 id 是表的第一列
 
-                GptQuestionGenerator gptQuestionGenerator = new GptQuestionGenerator(project, (Integer)id);
+                GptQuestionGenerator gptQuestionGenerator = new GptQuestionGenerator(project, (Integer) id);
                 String url = "https://chat.openai.com/?m=" + URLEncoder.encode(gptQuestionGenerator.getQuestion(), StandardCharsets.UTF_8);
                 BrowserUtil.browse(url);
             }
@@ -112,9 +112,23 @@ public final class MyTableView extends JPanel {
             if (selectedRow != -1) {
                 Object id = table.getModel().getValueAt(selectedRow, 0); // 假设 id 是表的第一列
 
-                GptQuestionGenerator gptQuestionGenerator = new GptQuestionGenerator(project, (Integer)id);
+                GptQuestionGenerator gptQuestionGenerator = new GptQuestionGenerator(project, (Integer) id);
                 String url = "https://www.phind.com/agent?q=" + URLEncoder.encode(gptQuestionGenerator.getQuestion(), StandardCharsets.UTF_8) + "&source=searchbox";
                 BrowserUtil.browse(url);
+            }
+        });
+
+        // 复制 GPT 的问题，方便国内用户
+        JMenuItem cotyGptQuestion = new JMenuItem("Copy GPT Question to Clipboard");    // Icons.ADD_ICON
+        cotyGptQuestion.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow != -1) {
+                Object id = table.getModel().getValueAt(selectedRow, 0); // 假设 id 是表的第一列
+                GptQuestionGenerator gptQuestionGenerator = new GptQuestionGenerator(project, (Integer) id);
+
+                StringSelection stringSelection = new StringSelection(gptQuestionGenerator.getQuestion());
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(stringSelection, null);
             }
         });
 
@@ -140,6 +154,7 @@ public final class MyTableView extends JPanel {
         popupMenu.addSeparator();
         popupMenu.add(optimizeWithOpenAI);
         popupMenu.add(optimizeWithPhind);
+        popupMenu.add(cotyGptQuestion);
         popupMenu.add(optimizeWithEverSql);
         popupMenu.addSeparator();
         popupMenu.add(ignoreSqlLogItem);
