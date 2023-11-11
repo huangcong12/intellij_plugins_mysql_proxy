@@ -19,7 +19,8 @@ import java.util.concurrent.CompletableFuture;
 public class VersionUpdateChecker {
     private static final Logger logger = Logger.getInstance(VersionUpdateChecker.class);
 
-    private static final String version = "1.0.8";
+    // 当前版本号，除了这里还有：gradle.properties 的 version
+    private static final String version = "1.0.10";
     private static final String apiVersionUrl = "https://plugins.jetbrains.com/api/plugins/22655/updates";
     private static String latestVersion = "";
 
@@ -84,21 +85,7 @@ public class VersionUpdateChecker {
             return false;
         }
 
-        String[] currentVersionParts = currentVersion.split("\\.");
-        String[] latestVersionParts = latestVersion.split("\\.");
-
-        for (int i = 0; i < Math.min(currentVersionParts.length, latestVersionParts.length); i++) {
-            int currentPart = Integer.parseInt(currentVersionParts[i]);
-            int latestPart = Integer.parseInt(latestVersionParts[i]);
-
-            if (currentPart < latestPart) {
-                return true;
-            } else if (currentPart > latestPart) {
-                return false;
-            }
-        }
-
-        return latestVersionParts.length > currentVersionParts.length;
+        return !currentVersion.equals(latestVersion);
     }
 
 }

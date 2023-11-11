@@ -107,6 +107,12 @@
 
     <h2>Important Note:</h2>
     You can report exception-issues directly from your IDE. Please add at least a comment what you have done when it occurred / how you can reproduce it. It would be even better when add an email address so I can contact you in case of questions.
+    <h2> 1.0.10 </h2>
+    <h3>Features</h3>
+    <ul>
+        <li>Add a popup for new version notifications.</li>
+        <li>Enhance the right-click menu with the option to copy GPT questions, catering to our users in Mainland China.</li>
+    </ul>
 
     <h2> 1.0.9 </h2>
     <h3>Features</h3>
