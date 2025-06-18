@@ -93,7 +93,7 @@ public final class MyTableView extends JPanel {
         });
 
         // openai 查询分析
-        JMenuItem optimizeWithOpenAI = new JMenuItem("Optimize with OpenAI (Free GPT-3.5, Login Required)");    // Icons.ADD_ICON
+        JMenuItem optimizeWithOpenAI = new JMenuItem("Optimize with OpenAI");    // Icons.ADD_ICON
         optimizeWithOpenAI.addActionListener(e -> {
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
@@ -101,19 +101,6 @@ public final class MyTableView extends JPanel {
 
                 GptQuestionGenerator gptQuestionGenerator = new GptQuestionGenerator(project, (Integer) id);
                 String url = "https://chat.openai.com/?m=" + URLEncoder.encode(gptQuestionGenerator.getQuestion(), StandardCharsets.UTF_8);
-                BrowserUtil.browse(url);
-            }
-        });
-
-        // phind 查询分析
-        JMenuItem optimizeWithPhind = new JMenuItem("Optimize with Phind (Free GPT 3.5)");    // Icons.ADD_ICON
-        optimizeWithPhind.addActionListener(e -> {
-            int selectedRow = table.getSelectedRow();
-            if (selectedRow != -1) {
-                Object id = table.getModel().getValueAt(selectedRow, 0); // 假设 id 是表的第一列
-
-                GptQuestionGenerator gptQuestionGenerator = new GptQuestionGenerator(project, (Integer) id);
-                String url = "https://www.phind.com/agent?q=" + URLEncoder.encode(gptQuestionGenerator.getQuestion(), StandardCharsets.UTF_8) + "&source=searchbox";
                 BrowserUtil.browse(url);
             }
         });
@@ -132,18 +119,6 @@ public final class MyTableView extends JPanel {
             }
         });
 
-        // EverSQL 查询分析
-        JMenuItem optimizeWithEverSql = new JMenuItem("Optimize with EverSQL (Premium)");    // Icons.ADD_ICON
-        optimizeWithEverSql.addActionListener(e -> {
-            int selectedRow = table.getSelectedRow();
-            if (selectedRow != -1) {
-                Object id = table.getModel().getValueAt(selectedRow, 0); // 假设 id 是表的第一列
-                String sql = tableModel.getSqlById((Integer) id);
-
-                String url = "https://www.eversql.com/sql-query-optimizer/?utm_source=plugin&utm_campaign=jetbrains&query=" + Base64.getEncoder().encodeToString(sql.getBytes());
-                BrowserUtil.browse(url);
-            }
-        });
 
         // 返回顶部
         Icon scrollToTopIcon = IconLoader.getIcon("/icons/top.svg", RecordingSwitchAction.class);
@@ -153,9 +128,7 @@ public final class MyTableView extends JPanel {
         popupMenu.add(copyItem);
         popupMenu.addSeparator();
         popupMenu.add(optimizeWithOpenAI);
-        popupMenu.add(optimizeWithPhind);
         popupMenu.add(cotyGptQuestion);
-        popupMenu.add(optimizeWithEverSql);
         popupMenu.addSeparator();
         popupMenu.add(ignoreSqlLogItem);
         popupMenu.add(deleteItem);
