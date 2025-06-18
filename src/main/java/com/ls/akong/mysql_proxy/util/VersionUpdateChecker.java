@@ -20,7 +20,7 @@ public class VersionUpdateChecker {
     private static final Logger logger = Logger.getInstance(VersionUpdateChecker.class);
 
     // 当前版本号，除了这里还有：gradle.properties 的 version
-    private static final String version = "1.0.10";
+    private static final String version = "1.0.13";
     private static final String apiVersionUrl = "https://plugins.jetbrains.com/api/plugins/22655/updates";
     private static String latestVersion = "";
 

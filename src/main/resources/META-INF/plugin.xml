@@ -107,6 +107,24 @@
 
     <h2>Important Note:</h2>
     You can report exception-issues directly from your IDE. Please add at least a comment what you have done when it occurred / how you can reproduce it. It would be even better when add an email address so I can contact you in case of questions.
+     <h2> 1.0.13 </h2>
+    <h3>Features</h3>
+    <ul>
+        <li>Editor supporting version 2025</li>
+    </ul>
+
+    <h2> 1.0.12 </h2>
+    <h3>Features</h3>
+    <ul>
+        <li>Editor supporting version 2024.2</li>
+    </ul>
+
+    <h2> 1.0.11 </h2>
+    <h3>Features</h3>
+    <ul>
+        <li>Regular upgrades, compatible with the latest versions of browsers supported by IDEA.</li>
+    </ul>
+
     <h2> 1.0.10 </h2>
     <h3>Features</h3>
     <ul>
